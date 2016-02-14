@@ -62,6 +62,7 @@ FrackMan::FrackMan()
 
 FrackMan::~FrackMan()
 {
+    
 }
 
 void FrackMan::doSomething()
