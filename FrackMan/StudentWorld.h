@@ -32,7 +32,7 @@ public:
 	{
 	}
     
-    ~StudentWorld();   // frees dynamically allocated memory (FrackMan and Dirt)
+    ~StudentWorld() {}   // frees dynamically allocated memory (FrackMan and Dirt)
 
 private:
 };
