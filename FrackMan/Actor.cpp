@@ -5,10 +5,11 @@
 
 // ACTOR IMPLEMENTATION ===========================================================================================
 
-Actor::Actor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
+Actor::Actor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible)
 :GraphObject(imageID, startX, startY, startDirection, size, depth)
 {
     m_stillAlive = true;
+    setVisible(visible);
 }
 
 Actor::~Actor()
@@ -29,19 +30,15 @@ bool Actor::isStillAlive()
 // DIRT IMPLEMENTATION ===========================================================================================
 
 Dirt::Dirt(int startX, int startY)
-: Actor(IID_DIRT, startX, startY, right, 0.25, 3)
+: Actor(IID_DIRT, startX, startY, right, 0.25, 3, true)
 {
     // other stuff I have to implement
     // I am dirt
     // dirt is me
-    
-    setVisible(true);
 }
 
-Dirt::~Dirt()
-{
-    
-}
+Dirt::~Dirt()   // do i need to add any code to this??
+{ }
 
 void Dirt::doSomething()
 { }
@@ -49,7 +46,7 @@ void Dirt::doSomething()
 // PERSON IMPLEMENTATION =========================================================================================
 
 Person::Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP)
-: Actor(imageID, startX, startY, startDirection, size, depth)
+: Actor(imageID, startX, startY, startDirection, size, depth, true)
 {
     m_healthPoints = HP;
 }
@@ -77,6 +74,13 @@ FrackMan::~FrackMan()
 
 void FrackMan::doSomething()
 {
-    
+    if (!isStillAlive())
+        return;
 }
 
+
+
+/*
+ NOTES: 
+ - only barrels of oil have setVisible(false) when initialized 
+*/

@@ -9,11 +9,10 @@
 class Actor: public GraphObject
 {
 public:
-    Actor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth);  // need params???
+    Actor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible);
     virtual ~Actor();
     virtual void doSomething() = 0;
     bool isStillAlive();
-    // must call setVisible() sometime?? but aren't barrels of oil not visible in the beginning??
     
 private:
     bool m_stillAlive;
