@@ -6,7 +6,7 @@ class StudentWorld;
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
-// PART 1.1: BASE CLASS FOR ALL GAME OBJECTS
+// BASE CLASS FOR ALL GAME OBJECTS
 class Actor: public GraphObject
 {
 public:
@@ -14,6 +14,7 @@ public:
     virtual ~Actor();
     virtual void doSomething() = 0;
     bool isStillAlive() const;
+    void makeDead();
     StudentWorld* whereAmI() const;
     
 private:
@@ -21,6 +22,7 @@ private:
     StudentWorld* m_studentWorld;
 };
 
+// ALL OBJECT CLASSES DERIVED DIRECTLY FROM THE ACTOR BASE CLASS
 class Dirt: public Actor
 {
 public:
@@ -29,6 +31,18 @@ public:
     virtual void doSomething();
 };
 
+class Boulder: public Actor
+{
+public:
+    Boulder(int startX, int startY, StudentWorld* world);
+    virtual ~Boulder();
+    virtual void doSomething();
+private:
+    bool m_stableState;  // true if Boulder is in a stable state, false if Boulder is in a waiting state
+    int numTicksWaiting;        // counts how many ticks a Boulder has spent in a waiting state
+};
+
+// FRACKMAN AND PROTESTOR CLASSES WHICH ARE DERIVED FROM A PERSON CLASS
 class Person: public Actor
 {
 public:
@@ -51,7 +65,5 @@ private:
     int m_numSonars;
     int m_numNuggets;
 };
-
-
 
 #endif // ACTOR_H_

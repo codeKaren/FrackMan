@@ -35,13 +35,20 @@ int StudentWorld::init()
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
+    // ADD A BOULDER FOR TESTING PURPOSES:
+    Boulder* b = new Boulder(21, 24, this);
+    addActor(b);
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move()
 {
     m_FrackMan->doSomething();
-
+    
+    for (int i = 0; i < m_allActors.size(); i++)
+        m_allActors[i]->doSomething();
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -71,7 +78,7 @@ StudentWorld::~StudentWorld()    // FREE HIM (all dynamically allocated memory)
     delete m_FrackMan;    // bye bye FrackMan
 }
 
-bool StudentWorld::isThereDirt(int x, int y)   // GET DIRTY
+bool StudentWorld::isThereDirt(int x, int y) const  // GET DIRTY
 {
     if (m_dirt[x][y] == nullptr)
         return false;
@@ -92,4 +99,9 @@ void StudentWorld::deleteDirt()    // delete dirt based on FrackMan's current po
             }
         }
     }
+}
+
+void StudentWorld::addActor(Actor* actor)
+{
+    m_allActors.push_back(actor);
 }

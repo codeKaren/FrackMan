@@ -21,6 +21,11 @@ bool Actor::isStillAlive() const
     return m_stillAlive;
 }
 
+void Actor::makeDead()
+{
+    m_stillAlive = false;
+}
+
 StudentWorld* Actor::whereAmI() const
 {
     return m_studentWorld;
@@ -37,6 +42,72 @@ Dirt::~Dirt()   // do i need to add any code to this??
 
 void Dirt::doSomething()
 { }
+
+// BOULDER IMPLEMENTATION =====================================================================================
+
+Boulder::Boulder(int startX, int startY, StudentWorld* world)
+: Actor(IID_BOULDER, startX, startY, down, 1.0, 1, true, world)
+{
+    m_stableState = true;
+    numTicksWaiting = 0;
+    whereAmI()->addActor(this);
+}
+        
+Boulder::~Boulder()
+{
+    
+}
+        
+void Boulder::doSomething()
+{
+    if (!isStillAlive())
+        return;
+    if (m_stableState == true)   // boulder is currently in a stable state
+    {
+        // check to see if there is any dirt below the boulder
+        int numMissingDirt = 0;
+        for (int i = getX(); i < getX() + 4; i++)
+        {
+            if (getY() - 1 < 0)   // going out of bounds below the below the boulder
+                break;
+            if (i > 64)  // going out of bounds beside the boulder
+                break;
+            if (! whereAmI()->isThereDirt(i, getY()-1))    // no dirt in the position below
+                numMissingDirt++;
+        }
+        if (numMissingDirt == 4)          // no dirt at all under the boulder
+        {
+            m_stableState = false;
+        }
+    }
+    
+    if (m_stableState == false)
+    {
+        if (numTicksWaiting == 30)
+        {
+            whereAmI()->playSound(SOUND_FALLING_ROCK);
+            if (getY()-1 < 0)         // hits the bottom of the oil field
+            {
+                makeDead();
+                return;
+            }
+            for (int i = getX(); i < getX() + 4; i++)
+            {
+                if (whereAmI()->isThereDirt(i, getY()-1))  // runs into dirt
+                {
+                    makeDead();
+                    return;
+                }
+                // ADD CODE TO CHECK IF THERE IS ANOTHER BOULDER UNDERNEATH
+            }
+            // the boulder doesn't have anything underneath it, so it can fall
+            moveTo(getX(), getY()-1);
+            // ADD CODE FOR WHEN BOULDER HITS PROTESTORS, ETC.
+        }
+        else
+            numTicksWaiting++;
+    }
+}
 
 // PERSON IMPLEMENTATION =========================================================================================
 
