@@ -74,7 +74,6 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
         {
             case KEY_PRESS_LEFT:
                 setDirection(left);
-                whereAmI()->playSound(SOUND_DIG);
                 if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
                     moveTo(getX(), getY());   // stay in the same position but maintain animations
                 else
@@ -83,7 +82,6 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                 
             case KEY_PRESS_RIGHT:
                 setDirection(right);
-                whereAmI()->playSound(SOUND_DIG);
                 if (getX()+1 < 0 || getX()+1 > 60)
                     moveTo(getX(), getY());
                 else
@@ -92,7 +90,6 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                 
             case KEY_PRESS_DOWN:
                 setDirection(down);
-                whereAmI()->playSound(SOUND_DIG);
                 if (getY()-1 < 0 || getY()-1 > 60)
                     moveTo(getX(), getY());
                 else
@@ -100,7 +97,6 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                 break;
             case KEY_PRESS_UP:
                 setDirection(up);
-                whereAmI()->playSound(SOUND_DIG);
                 if (getY()+1 < 0 || getY()+1 > 60)
                     moveTo(getX(), getY());
                 else

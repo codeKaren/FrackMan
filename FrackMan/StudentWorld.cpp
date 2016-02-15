@@ -50,6 +50,7 @@ int StudentWorld::move()
             {
                 delete m_dirt[i][j];
                 m_dirt[i][j] = nullptr;
+                playSound(SOUND_DIG);
             }
         }
     }
