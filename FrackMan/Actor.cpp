@@ -32,11 +32,7 @@ StudentWorld* Actor::whereAmI() const
 
 Dirt::Dirt(int startX, int startY, StudentWorld* world)
 : Actor(IID_DIRT, startX, startY, right, 0.25, 3, true, world)
-{
-    // other stuff I have to implement
-    // I am dirt
-    // dirt is me
-}
+{ }
 
 Dirt::~Dirt()   // do i need to add any code to this??
 { }
@@ -65,8 +61,6 @@ FrackMan::FrackMan(StudentWorld* world)
     m_numSquirts = 5;
     m_numSonars = 1;
     m_numNuggets = 0;
-    setVisible(true);
-    
 }
 
 FrackMan::~FrackMan()

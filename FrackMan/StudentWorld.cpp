@@ -21,16 +21,17 @@ int StudentWorld::init()
     // ADDING THE DIRT
     for (int i = 0; i < 64; i++)
     {
-        for (int j = 0; j < 64; j++)     // keep the top four rows clear of dirt
+        for (int j = 0; j < 64; j++)
         {
             if (i >= 30 && i <= 34 && j >= 4 && j <= 59)   // keep empty for mine shaft
                 m_dirt[i][j] = nullptr;
-            else if (j > 59)                          // keep the top of the screen empty
+            else if (j > 59)                          // keep the top four rows clear of dirt
                 m_dirt[i][j] = nullptr;
             else
                 m_dirt[i][j] = new Dirt(i, j, this);
         }
     }
+    
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
@@ -58,11 +59,28 @@ int StudentWorld::move()
 
 void StudentWorld::cleanUp()
 {
+    for (int i = 0; i < 64; i++)
+    {
+        for (int j = 0; j < 64; j++)
+        {
+            delete m_dirt[i][j];            // delete all of the dirt objects
+        }
+    }
+    
+    delete m_FrackMan;    // bye bye FrackMan
 }
 
-StudentWorld::~StudentWorld()
+StudentWorld::~StudentWorld()    // FREE HIM (all dynamically allocated memory)
 {
-    // FREE HIM (all dynamically allocated memory)
+    for (int i = 0; i < 64; i++)
+    {
+        for (int j = 0; j < 64; j++)
+        {
+            delete m_dirt[i][j];            // delete all of the dirt objects
+        }
+    }
+    
+    delete m_FrackMan;    // bye bye FrackMan
 }
 
 bool StudentWorld::isThereDirt(int x, int y)   // GET DIRTY

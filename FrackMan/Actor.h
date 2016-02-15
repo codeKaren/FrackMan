@@ -27,9 +27,6 @@ public:
     Dirt(int startX, int startY, StudentWorld* world);
     virtual ~Dirt();
     virtual void doSomething();
-    
-private:
-    
 };
 
 class Person: public Actor
