@@ -84,26 +84,34 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
         switch (keyPressed)
         {
             case KEY_PRESS_LEFT:
+                setDirection(left);
                 if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
                     moveTo(getX(), getY());   // stay in the same position but maintain animations
-                moveTo(getX()-1, getY());     // since it is a valid position, move to that position
+                else
+                    moveTo(getX()-1, getY());     // since it is a valid position, move to that position
                 break;
                 
             case KEY_PRESS_RIGHT:
+                setDirection(right);
                 if (getX()+1 < 0 || getX()+1 > 60)
                     moveTo(getX(), getY());
-                moveTo(getX()+1, getY());
+                else
+                    moveTo(getX()+1, getY());
                 break;
                 
             case KEY_PRESS_DOWN:
+                setDirection(down);
                 if (getY()-1 < 0 || getY()-1 > 60)
                     moveTo(getX(), getY());
-                moveTo(getX(), getY()-1);
+                else
+                    moveTo(getX(), getY()-1);
                 break;
             case KEY_PRESS_UP:
+                setDirection(up);
                 if (getY()+1 < 0 || getY()+1 > 60)
                     moveTo(getX(), getY());
-                moveTo(getX(), getY()+1);
+                else
+                    moveTo(getX(), getY()+1);
                 break;
         }
     }

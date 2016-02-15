@@ -21,11 +21,14 @@ int StudentWorld::init()
     // ADDING THE DIRT
     for (int i = 0; i < 64; i++)
     {
-        for (int j = 0; j < 60; j++)     // keep the top four rows clear of dirt
+        for (int j = 0; j < 64; j++)     // keep the top four rows clear of dirt
         {
-            if (i >= 30 && i <= 34 && j >= 4 && j <= 59)      // keep empty for mine shaft
+            if (i >= 30 && i <= 34 && j >= 4 && j <= 59)   // keep empty for mine shaft
                 m_dirt[i][j] = nullptr;
-            new Dirt(i, j, this);               // fill in the dirt
+            else if (j > 59)                          // keep the top of the screen empty
+                m_dirt[i][j] = nullptr;
+            else
+                new Dirt(i, j, this);  // fill in the dirt
         }
     }
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
@@ -37,14 +40,14 @@ int StudentWorld::init()
 int StudentWorld::move()
 {
     m_FrackMan->doSomething();
-    for (int i = 0; i < 4; i++)   // if there are dirt objects in FrackMan's new position
+    for (int i = m_FrackMan->getX(); i < m_FrackMan->getX() + 4; i++) // if there are dirt objects in FrackMan's new position
     {
-        for (int j = 0; j < 4; j++)
+        for (int j = m_FrackMan->getY(); j < m_FrackMan->getY() + 4; j++)
         {
-            if (isThereDirt(m_FrackMan->getX() + i, m_FrackMan->getY() + j))
+            if (isThereDirt(i, j))
             {
-                delete m_dirt[m_FrackMan->getX() + i][m_FrackMan->getY() + j];
-                m_dirt[m_FrackMan->getX() + i][m_FrackMan->getY() + j] = nullptr;
+                delete m_dirt[i][j];
+                m_dirt[i][j] = nullptr;
             }
         }
     }
