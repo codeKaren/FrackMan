@@ -42,19 +42,6 @@ int StudentWorld::move()
 {
     m_FrackMan->doSomething();
 
-    for (int i = m_FrackMan->getX(); i < m_FrackMan->getX() + 4; i++) // if there are dirt objects in FrackMan's new position
-    {                                                                 // delete them
-        for (int j = m_FrackMan->getY(); j < m_FrackMan->getY() + 4; j++)
-        {
-            if (isThereDirt(i, j))
-            {
-                delete m_dirt[i][j];
-                m_dirt[i][j] = nullptr;
-                playSound(SOUND_DIG);
-            }
-        }
-    }
-
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -89,4 +76,20 @@ bool StudentWorld::isThereDirt(int x, int y)   // GET DIRTY
     if (m_dirt[x][y] == nullptr)
         return false;
     return true;
+}
+
+void StudentWorld::deleteDirt()    // delete dirt based on FrackMan's current position
+{
+    for (int i = m_FrackMan->getX(); i < m_FrackMan->getX() + 4; i++) // if there are dirt objects in FrackMan's new position
+    {                                                                 // delete them
+        for (int j = m_FrackMan->getY(); j < m_FrackMan->getY() + 4; j++)
+        {
+            if (isThereDirt(i, j))
+            {
+                delete m_dirt[i][j];
+                m_dirt[i][j] = nullptr;
+                playSound(SOUND_DIG);
+            }
+        }
+    }
 }

@@ -63,7 +63,7 @@ FrackMan::FrackMan(StudentWorld* world)
 FrackMan::~FrackMan()
 { }
 
-void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt is deleted inside StudentWorld::move())
+void FrackMan::doSomething() 
 {
     if (!isStillAlive())
         return;
@@ -78,6 +78,7 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                     moveTo(getX(), getY());   // stay in the same position but maintain animations
                 else
                     moveTo(getX()-1, getY());     // since it is a valid position, move to that position
+                whereAmI()->deleteDirt();
                 break;
                 
             case KEY_PRESS_RIGHT:
@@ -86,6 +87,7 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                     moveTo(getX(), getY());
                 else
                     moveTo(getX()+1, getY());
+                whereAmI()->deleteDirt();
                 break;
                 
             case KEY_PRESS_DOWN:
@@ -94,6 +96,7 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                     moveTo(getX(), getY());
                 else
                     moveTo(getX(), getY()-1);
+                whereAmI()->deleteDirt();
                 break;
             case KEY_PRESS_UP:
                 setDirection(up);
@@ -101,6 +104,7 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
                     moveTo(getX(), getY());
                 else
                     moveTo(getX(), getY()+1);
+                whereAmI()->deleteDirt();
                 break;
         }
     }

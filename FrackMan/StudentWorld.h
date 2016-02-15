@@ -22,6 +22,8 @@ public:
     ~StudentWorld(); // frees dynamically allocated memory (FrackMan and Dirt)
     
     bool isThereDirt(int x, int y);   // returns true if there is dirt in the specified spot on the screen
+    
+    void deleteDirt();
 
 private:
     Dirt* m_dirt[64][64];
