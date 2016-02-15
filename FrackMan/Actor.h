@@ -2,6 +2,7 @@
 #define ACTOR_H_
 
 #include "GraphObject.h"
+class StudentWorld;
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
@@ -9,19 +10,21 @@
 class Actor: public GraphObject
 {
 public:
-    Actor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible);
+    Actor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, StudentWorld* world);
     virtual ~Actor();
     virtual void doSomething() = 0;
-    bool isStillAlive();
+    bool isStillAlive() const;
+    StudentWorld* whereAmI() const;
     
 private:
     bool m_stillAlive;
+    StudentWorld* m_studentWorld;
 };
 
 class Dirt: public Actor
 {
 public:
-    Dirt(int startX, int startY);
+    Dirt(int startX, int startY, StudentWorld* world);
     virtual ~Dirt();
     virtual void doSomething();
     
@@ -32,7 +35,7 @@ private:
 class Person: public Actor
 {
 public:
-    Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP);
+    Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP, StudentWorld* world);
     virtual ~Person();
     
 private:
@@ -42,7 +45,7 @@ private:
 class FrackMan: public Person
 {
 public:
-    FrackMan();
+    FrackMan(StudentWorld* world);
     virtual ~FrackMan();
     virtual void doSomething();
     
