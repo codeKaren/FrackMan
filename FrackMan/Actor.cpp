@@ -14,9 +14,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, floa
 }
 
 Actor::~Actor()
-{
-    
-}
+{ }
 
 bool Actor::isStillAlive() const
 {
@@ -49,8 +47,7 @@ Person::Person(int imageID, int startX, int startY, Direction startDirection, fl
 }
 
 Person::~Person()
-{
-}
+{ }
 
 // FRACKMAN IMPLEMENTATION =======================================================================================
 
@@ -64,9 +61,7 @@ FrackMan::FrackMan(StudentWorld* world)
 }
 
 FrackMan::~FrackMan()
-{
-    
-}
+{ }
 
 void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt is deleted inside StudentWorld::move())
 {
@@ -114,10 +109,3 @@ void FrackMan::doSomething() // moves FrackMan but doesn't delete the dirt (dirt
         }
     }
 }
-
-
-
-/*
- NOTES: 
- - only barrels of oil have setVisible(false) when initialized 
-*/
