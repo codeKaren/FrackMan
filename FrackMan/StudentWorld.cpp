@@ -28,7 +28,7 @@ int StudentWorld::init()
             else if (j > 59)                          // keep the top of the screen empty
                 m_dirt[i][j] = nullptr;
             else
-                new Dirt(i, j, this);  // fill in the dirt
+                m_dirt[i][j] = new Dirt(i, j, this);
         }
     }
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
@@ -40,8 +40,9 @@ int StudentWorld::init()
 int StudentWorld::move()
 {
     m_FrackMan->doSomething();
+
     for (int i = m_FrackMan->getX(); i < m_FrackMan->getX() + 4; i++) // if there are dirt objects in FrackMan's new position
-    {
+    {                                                                 // delete them
         for (int j = m_FrackMan->getY(); j < m_FrackMan->getY() + 4; j++)
         {
             if (isThereDirt(i, j))
@@ -51,7 +52,6 @@ int StudentWorld::move()
             }
         }
     }
-
 
     return GWSTATUS_CONTINUE_GAME;
 }
