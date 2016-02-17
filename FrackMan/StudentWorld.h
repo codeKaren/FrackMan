@@ -24,7 +24,9 @@ public:
     
     bool isThereDirt(int x, int y) const;   // returns true if there is dirt in the specified spot on the screen
     
-    void deleteDirt();   // deletes dirt that FrackMan digs up
+    bool isThereObstacle(int x, int y) const;  // returns true if there is an obstacle in the specifed spot (boulder)
+    
+    bool deleteDirt(Actor* actor);   // deletes dirt in position currently occupied by an actor
     
     void addActor(Actor* actor);  // add a new actor to StudentWorld
 

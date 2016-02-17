@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+#include <iostream> // TESTING ONLY
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
@@ -31,6 +32,11 @@ StudentWorld* Actor::whereAmI() const
     return m_studentWorld;
 }
 
+bool Actor::isObstacle() const
+{
+    return false;
+}
+
 // DIRT IMPLEMENTATION ===========================================================================================
 
 Dirt::Dirt(int startX, int startY, StudentWorld* world)
@@ -51,11 +57,12 @@ Boulder::Boulder(int startX, int startY, StudentWorld* world)
     m_stableState = true;
     numTicksWaiting = 0;
     whereAmI()->addActor(this);
+    whereAmI()->deleteDirt(this);
 }
         
 Boulder::~Boulder()
 {
-    
+    std::cout << "Boulder deleted" << std::endl;
 }
         
 void Boulder::doSomething()
@@ -83,30 +90,41 @@ void Boulder::doSomething()
     
     if (m_stableState == false)
     {
-        if (numTicksWaiting == 30)
+        if (numTicksWaiting >= 30)
         {
-            whereAmI()->playSound(SOUND_FALLING_ROCK);
+            if (numTicksWaiting == 30)
+                whereAmI()->playSound(SOUND_FALLING_ROCK);       // only plays the sound one time
             if (getY()-1 < 0)         // hits the bottom of the oil field
             {
                 makeDead();
                 return;
             }
-            for (int i = getX(); i < getX() + 4; i++)
+            for (int i = getX(); i < getX() + 4; i++)   // make sure to check the whole width of the boulder
             {
-                if (whereAmI()->isThereDirt(i, getY()-1))  // runs into dirt
+                if (whereAmI()->isThereDirt(i, getY()-1))  // runs into dirt under it
                 {
                     makeDead();
                     return;
                 }
-                // ADD CODE TO CHECK IF THERE IS ANOTHER BOULDER UNDERNEATH
+                
+                if (whereAmI()->isThereObstacle(i, getY()-1))   // runs into an obstacle below it
+                {
+                    makeDead();
+                    return;
+                }
             }
             // the boulder doesn't have anything underneath it, so it can fall
             moveTo(getX(), getY()-1);
+            
             // ADD CODE FOR WHEN BOULDER HITS PROTESTORS, ETC.
         }
-        else
             numTicksWaiting++;
     }
+}
+
+bool Boulder::isObstacle() const
+{
+    return true;
 }
 
 // PERSON IMPLEMENTATION =========================================================================================
@@ -147,35 +165,47 @@ void FrackMan::doSomething()
                 setDirection(left);
                 if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
                     moveTo(getX(), getY());   // stay in the same position but maintain animations
+                else if(whereAmI()->isThereObstacle(getX()-1, getY()))  // can't dig into boulder
+                        break;
                 else
                     moveTo(getX()-1, getY());     // since it is a valid position, move to that position
-                whereAmI()->deleteDirt();
+                if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
+                    whereAmI()->playSound(SOUND_DIG);
                 break;
                 
             case KEY_PRESS_RIGHT:
                 setDirection(right);
                 if (getX()+1 < 0 || getX()+1 > 60)
                     moveTo(getX(), getY());
+                else if(whereAmI()->isThereObstacle(getX()+4, getY()))  // must do +4 because getX() is the lower left corner
+                    break;
                 else
                     moveTo(getX()+1, getY());
-                whereAmI()->deleteDirt();
+                if (whereAmI()->deleteDirt(this))
+                    whereAmI()->playSound(SOUND_DIG);
                 break;
                 
             case KEY_PRESS_DOWN:
                 setDirection(down);
                 if (getY()-1 < 0 || getY()-1 > 60)
                     moveTo(getX(), getY());
+                else if(whereAmI()->isThereObstacle(getX(), getY()-1))
+                    break;
                 else
                     moveTo(getX(), getY()-1);
-                whereAmI()->deleteDirt();
+                if (whereAmI()->deleteDirt(this))
+                    whereAmI()->playSound(SOUND_DIG);
                 break;
             case KEY_PRESS_UP:
                 setDirection(up);
                 if (getY()+1 < 0 || getY()+1 > 60)
                     moveTo(getX(), getY());
+                else if(whereAmI()->isThereObstacle(getX(), getY()+4))
+                    break;
                 else
                     moveTo(getX(), getY()+1);
-                whereAmI()->deleteDirt();
+                if (whereAmI()->deleteDirt(this))
+                    whereAmI()->playSound(SOUND_DIG);
                 break;
         }
     }

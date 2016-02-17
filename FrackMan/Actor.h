@@ -15,6 +15,7 @@ public:
     virtual void doSomething() = 0;
     bool isStillAlive() const;
     void makeDead();
+    virtual bool isObstacle() const;    // returns true if object is an obstacle (currently only boulders)
     StudentWorld* whereAmI() const;
     
 private:
@@ -37,6 +38,7 @@ public:
     Boulder(int startX, int startY, StudentWorld* world);
     virtual ~Boulder();
     virtual void doSomething();
+    virtual bool isObstacle() const;
 private:
     bool m_stableState;  // true if Boulder is in a stable state, false if Boulder is in a waiting state
     int numTicksWaiting;        // counts how many ticks a Boulder has spent in a waiting state
