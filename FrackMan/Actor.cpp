@@ -295,6 +295,72 @@ void Squirt::decreaseDistance()
     m_travelDistance--;
 }
 
+// GOODIES IMPLEMENTATION ========================================================================================
+
+Goodies::Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, StudentWorld* world)
+: Actor(imageID, startX, startY, startDirection, size, depth, visible, world)
+{
+    
+}
+
+Goodies::~Goodies()
+{
+    
+}
+
+// OIL BARREL IMPLEMENTATION ======================================================================================
+
+OilBarrel::OilBarrel(int startX, int startY, StudentWorld* world)
+: Goodies(IID_BARREL, startX, startY, right, 1.0, 2, false, world)
+{
+    
+}
+
+OilBarrel::~OilBarrel()
+{
+    
+}
+
+// NUGGET IMPLEMENTATION =========================================================================================
+
+Nugget::Nugget(int startX, int startY, bool visible, bool pickupState, bool permanentState, StudentWorld* world)
+: Goodies(IID_GOLD, startX, startY, right, 1.0, 2, visible, world)
+{
+    m_pickupableByFrackMan = pickupState;
+    m_permanentState = permanentState;
+}
+
+Nugget::~Nugget()
+{
+    
+}
+
+// SONAR KIT IMPLEMENTATION ======================================================================================
+
+SonarKit::SonarKit(int startX, int startY, StudentWorld* world)
+: Goodies(IID_SONAR, startX, startY, right, 1.0, 2, true, world)
+{
+    
+}
+
+SonarKit::~SonarKit()
+{
+    
+}
+
+// WATER POOL IMPLEMENTATION =====================================================================================
+
+WaterPool::WaterPool(int startX, int startY, int numTicks, StudentWorld* world)
+: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, world)
+{
+    m_numTicksToExist = numTicks;
+}
+
+WaterPool::~WaterPool()
+{
+    
+}
+
 // PERSON IMPLEMENTATION =========================================================================================
 
 Person::Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP, StudentWorld* world)

@@ -56,6 +56,58 @@ private:
     int m_travelDistance;
 };
 
+// OIL BARRELS, NUGGETS, SONAR KIT, AND WATER POOL CLASSES WHICH ARE DERIVED FROM A GOODIES CLASS
+class Goodies: public Actor
+{
+public:
+    Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, StudentWorld* world);
+    virtual ~Goodies();
+    
+private:
+    
+};
+
+class OilBarrel: public Goodies
+{
+public:
+    OilBarrel(int startX, int startY, StudentWorld* world);
+    virtual ~OilBarrel();
+    
+private:
+    
+};
+
+class Nugget: public Goodies
+{
+public:
+    Nugget(int startX, int startY, bool visible, bool pickupState, bool permanentState, StudentWorld* world);
+    virtual ~Nugget();
+
+private:
+    bool m_pickupableByFrackMan;
+    bool m_permanentState;
+};
+
+class SonarKit: public Goodies
+{
+public:
+    SonarKit(int startX, int startY, StudentWorld* world);
+    virtual ~SonarKit();
+    
+private:
+    
+};
+
+class WaterPool: public Goodies
+{
+public:
+    WaterPool(int startX, int startY, int numTicks, StudentWorld* world);
+    virtual ~WaterPool();
+    
+private:
+    int m_numTicksToExist;
+};
+
 // FRACKMAN AND PROTESTOR CLASSES WHICH ARE DERIVED FROM A PERSON CLASS
 class Person: public Actor
 {
