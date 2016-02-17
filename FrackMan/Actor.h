@@ -44,6 +44,18 @@ private:
     int numTicksWaiting;        // counts how many ticks a Boulder has spent in a waiting state
 };
 
+class Squirt: public Actor
+{
+public:
+    Squirt(int x, int y, Direction direction, StudentWorld* world);
+    virtual ~Squirt();
+    virtual void doSomething();
+    
+private:
+    void decreaseDistance();
+    int m_travelDistance;
+};
+
 // FRACKMAN AND PROTESTOR CLASSES WHICH ARE DERIVED FROM A PERSON CLASS
 class Person: public Actor
 {

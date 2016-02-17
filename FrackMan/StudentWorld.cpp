@@ -37,11 +37,9 @@ int StudentWorld::init()
     m_FrackMan = new FrackMan(this);
     
     // ADD A BOULDER FOR TESTING PURPOSES:
-    Boulder* b = new Boulder(21, 24, this);
-    addActor(b);
+    new Boulder(21, 24, this);
     
-    Boulder* b2 = new Boulder(21, 10, this);
-    addActor(b2);
+    new Boulder(21, 10, this);
     
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -49,6 +47,9 @@ int StudentWorld::init()
 int StudentWorld::move()
 {
     m_FrackMan->doSomething();
+    
+    if (m_FrackMan->isStillAlive() == false)  // FRACK MAN IS DEAD NOOOOOOO
+        return GWSTATUS_PLAYER_DIED;
     
     for (int i = 0; i < m_allActors.size(); i++)
         m_allActors[i]->doSomething();
@@ -78,7 +79,7 @@ void StudentWorld::cleanUp()
         }
     }
     
-    for (vector<Actor*>::iterator it = m_allActors.begin(); it != m_allActors.end(); )
+    for (vector<Actor*>::iterator it = m_allActors.begin(); it != m_allActors.end(); )   // delete all game objects
     {
         delete *it;
         it = m_allActors.erase(it);
@@ -95,6 +96,12 @@ StudentWorld::~StudentWorld()    // FREE HIM (all dynamically allocated memory)
         {
             delete m_dirt[i][j];            // delete all of the dirt objects
         }
+    }
+    
+    for (vector<Actor*>::iterator it = m_allActors.begin(); it != m_allActors.end(); )   // delete all game objects
+    {
+        delete *it;
+        it = m_allActors.erase(it);
     }
     
     delete m_FrackMan;    // bye bye FrackMan

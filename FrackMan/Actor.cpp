@@ -61,9 +61,7 @@ Boulder::Boulder(int startX, int startY, StudentWorld* world)
 }
         
 Boulder::~Boulder()
-{
-    std::cout << "Boulder deleted" << std::endl;
-}
+{ }
         
 void Boulder::doSomething()
 {
@@ -127,6 +125,176 @@ bool Boulder::isObstacle() const
     return true;
 }
 
+// SQUIRT IMPLEMENTATION =========================================================================================
+
+Squirt::Squirt(int x, int y, Direction direction, StudentWorld* world)
+:Actor(IID_WATER_SPURT, x, y, direction, 1.0, 1, true, world)
+{
+    m_travelDistance = 4;
+}
+
+Squirt::~Squirt()
+{
+    
+}
+
+void Squirt::doSomething()
+{
+    // IMPLEMENT LATER: CAUSE 2 POINTS OF ANNOYANCE TO PROTESTORS
+    
+    if (m_travelDistance == 0)   // travelled full distance
+    {
+        makeDead();
+        return;
+    }
+    
+    else
+    {
+
+        // check to see if there is dirt in front of FrackMan (no squirt can be put there)
+        for (int i = getX(); i < getX() + 4; i++)
+        {
+            for (int j = getY(); j < getY() + 4; j++)
+            {
+                if (whereAmI()->isThereDirt(i, j))    // dirt found
+                {
+                    makeDead();
+                    return;
+                }
+            }
+        }
+
+        // Squirt can be generated in front of FrackMan, so check to see if it can move around
+        switch (getDirection())
+        {
+            case left:
+                if (getX()-1 < 0 || getX()-1 > 60)     // gone out of bounds
+                {
+                    makeDead();
+                    return;
+                }
+                else if(whereAmI()->isThereObstacle(getX()-1, getY()))   // location occupied by boulder
+                {
+                    makeDead();
+                    return;
+                }
+                else
+                {
+                    // check to see if there is dirt on the left side
+                    for (int k = getY(); k < getY() + 4; k++)
+                    {
+                        if (whereAmI()->isThereDirt(getX()-1, k))
+                        {
+                            makeDead();
+                            return;
+                        }
+                    }
+                    
+                    // no dirt found on the left, so move over one square to the left (to the left, everything you own in a box to the left)
+                    moveTo(getX()-1, getY());
+                    decreaseDistance();
+                    return;
+                }
+                break;
+                
+            case right:
+                if (getX()+1 < 0 || getX()+1 > 60)
+                {
+                    makeDead();
+                    return;
+                }
+                else if(whereAmI()->isThereObstacle(getX()+4, getY()))
+                {
+                    makeDead();
+                    return;
+                }
+                else
+                {
+                    // check to see if there is dirt on the right side
+                    for (int k = getY(); k < getY() + 4; k++)
+                    {
+                        if (whereAmI()->isThereDirt(getX()+4, k))    // +4 because x,y is the lower left corner
+                        {
+                            makeDead();
+                            return;
+                        }
+                    }
+                    
+                    // no dirt found on the right, so move over one square
+                    moveTo(getX()+1, getY());
+                    decreaseDistance();
+                    return;
+                }
+                break;
+            case down:
+                if (getY()-1 < 0 || getY()-1 > 60)
+                {
+                    makeDead();
+                    return;
+                }
+                else if (whereAmI()->isThereObstacle(getX(), getY()-1))
+                {
+                    makeDead();
+                    return;
+                }
+                else
+                {
+                    // check to see if there is dirt on the bottom
+                    for (int k = getX(); k < getX() + 4; k++)
+                    {
+                        if (whereAmI()->isThereDirt(k, getY()-1))
+                        {
+                            makeDead();
+                            return;
+                        }
+                    }
+                    
+                    // no dirt on the bottom, so move down
+                    moveTo(getX(), getY() - 1);
+                    decreaseDistance();
+                    return;
+                }
+                break;
+            case up:
+                if (getY()+1 < 0 || getY()+1 > 60)
+                {
+                    makeDead();
+                    return;
+                }
+                else if(whereAmI()->isThereObstacle(getX(), getY()+4))
+                {
+                    makeDead();
+                    return;
+                }
+                else
+                {
+                    // check to see if there is dirt on the top
+                    for (int k = getX(); k < getX() + 4; k++)
+                    {
+                        if (whereAmI()->isThereDirt(k, getY()+4))
+                        {
+                            makeDead();
+                            return;
+                        }
+                    }
+                    
+                    // no dirt on the top, so move up
+                    moveTo(getX(), getY() + 1);
+                    decreaseDistance();
+                    return;
+                }
+                break;
+            case none:
+                break;
+        }
+    }
+}
+
+void Squirt::decreaseDistance()
+{
+    m_travelDistance--;
+}
+
 // PERSON IMPLEMENTATION =========================================================================================
 
 Person::Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP, StudentWorld* world)
@@ -162,7 +330,11 @@ void FrackMan::doSomething()
         switch (keyPressed)
         {
             case KEY_PRESS_LEFT:
-                setDirection(left);
+                if (getDirection() != left)     // only turn FrackMan in the correct direction, DON'T MOVE
+                {
+                    setDirection(left);
+                    return;
+                }
                 if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
                     moveTo(getX(), getY());   // stay in the same position but maintain animations
                 else if(whereAmI()->isThereObstacle(getX()-1, getY()))  // can't dig into boulder
@@ -174,7 +346,11 @@ void FrackMan::doSomething()
                 break;
                 
             case KEY_PRESS_RIGHT:
-                setDirection(right);
+                if (getDirection() != right)
+                {
+                    setDirection(right);
+                    return;
+                }
                 if (getX()+1 < 0 || getX()+1 > 60)
                     moveTo(getX(), getY());
                 else if(whereAmI()->isThereObstacle(getX()+4, getY()))  // must do +4 because getX() is the lower left corner
@@ -186,7 +362,11 @@ void FrackMan::doSomething()
                 break;
                 
             case KEY_PRESS_DOWN:
-                setDirection(down);
+                if (getDirection() != down)
+                {
+                    setDirection(down);
+                    return;
+                }
                 if (getY()-1 < 0 || getY()-1 > 60)
                     moveTo(getX(), getY());
                 else if(whereAmI()->isThereObstacle(getX(), getY()-1))
@@ -196,8 +376,13 @@ void FrackMan::doSomething()
                 if (whereAmI()->deleteDirt(this))
                     whereAmI()->playSound(SOUND_DIG);
                 break;
+                
             case KEY_PRESS_UP:
-                setDirection(up);
+                if (getDirection() != up)     
+                {
+                    setDirection(up);
+                    return;
+                }
                 if (getY()+1 < 0 || getY()+1 > 60)
                     moveTo(getX(), getY());
                 else if(whereAmI()->isThereObstacle(getX(), getY()+4))
@@ -206,6 +391,47 @@ void FrackMan::doSomething()
                     moveTo(getX(), getY()+1);
                 if (whereAmI()->deleteDirt(this))
                     whereAmI()->playSound(SOUND_DIG);
+                break;
+                
+            case KEY_PRESS_SPACE:     // SQUIRT TIME
+                if (m_numSquirts > 0)    // still has squirts left
+                {
+                    whereAmI()->playSound(SOUND_PLAYER_SQUIRT);
+                    m_numSquirts--;
+                    switch (getDirection())
+                    {
+                        case left:
+                        {
+                            Squirt* leftSquirt = new Squirt(getX()-4, getY(), left, whereAmI());
+                            whereAmI()->addActor(leftSquirt);
+                            break;
+                        }
+                        case right:
+                        {
+                            Squirt* rightSquirt = new Squirt(getX()+4, getY(), right, whereAmI());
+                            whereAmI()->addActor(rightSquirt);
+                            break;
+                        }
+                        case down:
+                        {
+                            Squirt* downSquirt = new Squirt(getX(), getY()-4, down, whereAmI());
+                            whereAmI()->addActor(downSquirt);
+                            break;
+                        }
+                        case up:
+                        {
+                            Squirt* upSquirt = new Squirt(getX(), getY()+4, up, whereAmI());
+                            whereAmI()->addActor(upSquirt);
+                            break;
+                        }
+                        case none:
+                            break;
+                    }
+                }
+                break;
+                
+            case KEY_PRESS_ESCAPE:   // END THE CURRENT LEVEL
+                makeDead();
                 break;
         }
     }
