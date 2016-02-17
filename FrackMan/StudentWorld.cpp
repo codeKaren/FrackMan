@@ -36,10 +36,19 @@ int StudentWorld::init()
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
-    // ADD A BOULDER FOR TESTING PURPOSES:
-    new Boulder(21, 24, this);
+    // BEGIN TESTING CODE
+    Boulder* b1 = new Boulder(21, 24, this);
     
-    new Boulder(21, 10, this);
+    Boulder* b2 = new Boulder(21, 10, this);
+    
+    cout << getRadiusBetween(b1, b2) << endl;  // should print 14
+    
+    Boulder* b3 = new Boulder(6, 8, this);
+    
+    Boulder* b4 = new Boulder(0, 0, this);
+    
+    cout << getRadiusBetween(b3, b4) << endl;   // should print 10
+    // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -154,4 +163,11 @@ bool StudentWorld::deleteDirt(Actor* actor)    // delete dirt based on object/s 
 void StudentWorld::addActor(Actor* actor)
 {
     m_allActors.push_back(actor);
+}
+
+double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const
+{
+    double xDistance = first->getX() - second->getX();
+    double yDistance = first->getY() - second->getY();
+    return sqrt(pow(xDistance,2) + pow(yDistance,2));
 }

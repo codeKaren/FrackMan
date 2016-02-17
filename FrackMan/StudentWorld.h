@@ -29,6 +29,8 @@ public:
     bool deleteDirt(Actor* actor);   // deletes dirt in position currently occupied by an actor
     
     void addActor(Actor* actor);  // add a new actor to StudentWorld
+    
+    double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
 private:
     Dirt* m_dirt[64][64];
