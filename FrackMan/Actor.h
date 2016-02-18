@@ -134,6 +134,7 @@ public:
     virtual ~FrackMan();
     virtual void doSomething();
     void addToInventory(Goodies* goodie, char label);
+    void attemptToMove(Direction direction, int addToX, int addToY, int obstacleX, int obstacleY);
     
 private:
     int m_numSquirts;

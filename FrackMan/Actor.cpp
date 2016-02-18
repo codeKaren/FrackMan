@@ -507,69 +507,73 @@ void FrackMan::doSomething()
         switch (keyPressed)
         {
             case KEY_PRESS_LEFT:
-                if (getDirection() != left)     // only turn FrackMan in the correct direction, DON'T MOVE
-                {
-                    setDirection(left);
-                    return;
-                }
-                if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
-                    moveTo(getX(), getY());   // stay in the same position but maintain animations
-                else if(whereAmI()->isThereObstacle(getX()-1, getY()))  // can't dig into boulder
-                        break;
-                else
-                    moveTo(getX()-1, getY());     // since it is a valid position, move to that position
-                if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
-                    whereAmI()->playSound(SOUND_DIG);
+//                if (getDirection() != left)     // only turn FrackMan in the correct direction, DON'T MOVE
+//                {
+//                    setDirection(left);
+//                    return;
+//                }
+//                if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
+//                    moveTo(getX(), getY());   // stay in the same position but maintain animations
+//                else if(whereAmI()->isThereObstacle(getX()-1, getY()))  // can't dig into boulder
+//                        break;
+//                else
+//                    moveTo(getX()-1, getY());     // since it is a valid position, move to that position
+//                if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
+//                    whereAmI()->playSound(SOUND_DIG);
+//                break;
+                attemptToMove(left, -1, 0, -1, 0);
                 break;
-                
             case KEY_PRESS_RIGHT:
-                if (getDirection() != right)
-                {
-                    setDirection(right);
-                    return;
-                }
-                if (getX()+1 < 0 || getX()+1 > 60)
-                    moveTo(getX(), getY());
-                else if(whereAmI()->isThereObstacle(getX()+4, getY()))  // must do +4 because getX() is the lower left corner
-                    break;
-                else
-                    moveTo(getX()+1, getY());
-                if (whereAmI()->deleteDirt(this))
-                    whereAmI()->playSound(SOUND_DIG);
+//                if (getDirection() != right)
+//                {
+//                    setDirection(right);
+//                    return;
+//                }
+//                if (getX()+1 < 0 || getX()+1 > 60)
+//                    moveTo(getX(), getY());
+//                else if(whereAmI()->isThereObstacle(getX()+4, getY()))  // must do +4 because getX() is the lower left corner
+//                    break;
+//                else
+//                    moveTo(getX()+1, getY());
+//                if (whereAmI()->deleteDirt(this))
+//                    whereAmI()->playSound(SOUND_DIG);
+//                break;
+                attemptToMove(right, 1, 0, 4, 0);
                 break;
-                
             case KEY_PRESS_DOWN:
-                if (getDirection() != down)
-                {
-                    setDirection(down);
-                    return;
-                }
-                if (getY()-1 < 0 || getY()-1 > 60)
-                    moveTo(getX(), getY());
-                else if(whereAmI()->isThereObstacle(getX(), getY()-1))
-                    break;
-                else
-                    moveTo(getX(), getY()-1);
-                if (whereAmI()->deleteDirt(this))
-                    whereAmI()->playSound(SOUND_DIG);
+//                if (getDirection() != down)
+//                {
+//                    setDirection(down);
+//                    return;
+//                }
+//                if (getY()-1 < 0 || getY()-1 > 60)
+//                    moveTo(getX(), getY());
+//                else if(whereAmI()->isThereObstacle(getX(), getY()-1))
+//                    break;
+//                else
+//                    moveTo(getX(), getY()-1);
+//                if (whereAmI()->deleteDirt(this))
+//                    whereAmI()->playSound(SOUND_DIG);
+//                break;
+                attemptToMove(down, 0, -1, 0, -1);
                 break;
-                
             case KEY_PRESS_UP:
-                if (getDirection() != up)     
-                {
-                    setDirection(up);
-                    return;
-                }
-                if (getY()+1 < 0 || getY()+1 > 60)
-                    moveTo(getX(), getY());
-                else if(whereAmI()->isThereObstacle(getX(), getY()+4))
-                    break;
-                else
-                    moveTo(getX(), getY()+1);
-                if (whereAmI()->deleteDirt(this))
-                    whereAmI()->playSound(SOUND_DIG);
+//                if (getDirection() != up)     
+//                {
+//                    setDirection(up);
+//                    return;
+//                }
+//                if (getY()+1 < 0 || getY()+1 > 60)
+//                    moveTo(getX(), getY());
+//                else if(whereAmI()->isThereObstacle(getX(), getY()+4))
+//                    break;
+//                else
+//                    moveTo(getX(), getY()+1);
+//                if (whereAmI()->deleteDirt(this))
+//                    whereAmI()->playSound(SOUND_DIG);
+//                break;
+                attemptToMove(up, 0, 1, 0, 4);
                 break;
-                
             case KEY_PRESS_SPACE:     // SQUIRT TIME
                 if (m_numSquirts > 0)    // still has squirts left
                 {
@@ -618,8 +622,10 @@ void FrackMan::doSomething()
                     m_numNuggets--;
                 }
                 break;
-                
-            // CASE 'Z' or 'z' for sonar press 
+            case 'z':
+            case 'Z':
+                // implement the sonar functions
+                break;
                 
         }
     }
@@ -639,4 +645,25 @@ void FrackMan::addToInventory(Goodies *goodie, char label)
             m_numSquirts+=5;
             break;
     }
+}
+
+void FrackMan::attemptToMove(Direction direction, int addToX, int addToY, int obstacleX, int obstacleY)
+{
+    if (getDirection() != direction)    // only turn FrackMan in the current direction, DON'T MOVE
+    {
+        setDirection(direction);
+        return;
+    }
+    
+    if (getX()+addToX < 0 || getX()+addToX > 60 || getY()+addToY < 0 || getY()+addToY > 60)    // gone out of bounds
+        moveTo(getX(), getY());   // stay in the same position but maintain animations
+    
+    else if(whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))  // can't dig into boulder
+        return;
+    
+    else     // no boulders and not out of bounds, so move
+        moveTo(getX()+addToX, getY()+addToY);
+       
+    if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
+        whereAmI()->playSound(SOUND_DIG);
 }
