@@ -60,52 +60,60 @@ private:
 class Goodies: public Actor
 {
 public:
-    Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, StudentWorld* world);
+    Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, int numTicks, StudentWorld* world);
     virtual ~Goodies();
-    
+    bool isVisible() const;   // returns true if visible by FrackMan
+    void makeVisible();  // sets m_visible to true
+    int howManyTicksLeft() const;   // returns how many ticks the goodie has left before it must disappear
+    void decreaseNumTicks();  // decreases the number of ticks by one
 private:
-    
+    bool m_visible;
+    int m_numTicks;
 };
 
-class OilBarrel: public Goodies
+class OilBarrel: public Goodies    // *** ALL DONE *** //
 {
 public:
     OilBarrel(int startX, int startY, StudentWorld* world);
     virtual ~OilBarrel();
+    virtual void doSomething();
     
 private:
-    
+    bool m_visible;
 };
 
-class Nugget: public Goodies
+class Nugget: public Goodies   // GOODIE CHAR 'n'
 {
 public:
     Nugget(int startX, int startY, bool visible, bool pickupState, bool permanentState, StudentWorld* world);
     virtual ~Nugget();
+    virtual void doSomething();
 
 private:
     bool m_pickupableByFrackMan;
     bool m_permanentState;
+    int m_numTicks;
 };
 
-class SonarKit: public Goodies
+class SonarKit: public Goodies   // GOODIE CHAR 's'
 {
 public:
     SonarKit(int startX, int startY, StudentWorld* world);
     virtual ~SonarKit();
+    virtual void doSomething();
     
 private:
     
 };
 
-class WaterPool: public Goodies
+class WaterPool: public Goodies   // GOODIE CHAR 'w'
 {
 public:
     WaterPool(int startX, int startY, int numTicks, StudentWorld* world);
     virtual ~WaterPool();
+    virtual void doSomething();
     
 private:
-    int m_numTicksToExist;
 };
 
 // FRACKMAN AND PROTESTOR CLASSES WHICH ARE DERIVED FROM A PERSON CLASS
@@ -125,6 +133,7 @@ public:
     FrackMan(StudentWorld* world);
     virtual ~FrackMan();
     virtual void doSomething();
+    void addToInventory(Goodies* goodie, char label);
     
 private:
     int m_numSquirts;

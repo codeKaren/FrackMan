@@ -111,6 +111,7 @@ void Boulder::doSomething()
                     return;
                 }
             }
+            
             // the boulder doesn't have anything underneath it, so it can fall
             moveTo(getX(), getY()-1);
             
@@ -297,10 +298,13 @@ void Squirt::decreaseDistance()
 
 // GOODIES IMPLEMENTATION ========================================================================================
 
-Goodies::Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, StudentWorld* world)
+Goodies::Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, int numTicks, StudentWorld* world)
 : Actor(imageID, startX, startY, startDirection, size, depth, visible, world)
 {
-    
+    setVisible(visible);
+    whereAmI()->addActor(this);
+    m_visible = visible;
+    m_numTicks = numTicks;
 }
 
 Goodies::~Goodies()
@@ -308,12 +312,32 @@ Goodies::~Goodies()
     
 }
 
+bool Goodies::isVisible() const
+{
+    return m_visible;
+}
+
+void Goodies::makeVisible()
+{
+    m_visible = true;
+}
+
+int Goodies::howManyTicksLeft() const  // returns how many ticks the goodie has left before it must disappear
+{
+    return m_numTicks;
+}
+
+void Goodies::decreaseNumTicks()  // decreases the number of ticks by one
+{
+    m_numTicks--; 
+}
+
 // OIL BARREL IMPLEMENTATION ======================================================================================
 
 OilBarrel::OilBarrel(int startX, int startY, StudentWorld* world)
-: Goodies(IID_BARREL, startX, startY, right, 1.0, 2, false, world)
+: Goodies(IID_BARREL, startX, startY, right, 1.0, 2, false, 0, world)
 {
-    
+
 }
 
 OilBarrel::~OilBarrel()
@@ -321,10 +345,29 @@ OilBarrel::~OilBarrel()
     
 }
 
+void OilBarrel::doSomething()
+{
+    if (!isStillAlive())    // barrel is dead, so return right away
+        return;
+    if (isVisible() == false && whereAmI()->closeToFrackMan(this, 4.00))   // FrackMan is discovers the OilBarrel
+    {
+        setVisible(true);
+        makeVisible();
+        return;
+    }
+    else if (whereAmI()->closeToFrackMan(this, 3.00))   // FrackMan is close enough to pick up the oil barrel
+    {
+        makeDead();
+        whereAmI()->playSound(SOUND_FOUND_OIL);
+        whereAmI()->increaseScore(1000);
+        whereAmI()->decreaseBarrelNum();
+    }
+}
+
 // NUGGET IMPLEMENTATION =========================================================================================
 
 Nugget::Nugget(int startX, int startY, bool visible, bool pickupState, bool permanentState, StudentWorld* world)
-: Goodies(IID_GOLD, startX, startY, right, 1.0, 2, visible, world)
+: Goodies(IID_GOLD, startX, startY, right, 1.0, 2, visible, 100, world)
 {
     m_pickupableByFrackMan = pickupState;
     m_permanentState = permanentState;
@@ -335,10 +378,40 @@ Nugget::~Nugget()
     
 }
 
+void Nugget::doSomething()
+{
+    if (!isStillAlive())    // nugget is dead, so return right away
+        return;
+    if (!isVisible() && whereAmI()->closeToFrackMan(this, 4.00))   // FrackMan discovers the nugget
+    {
+        setVisible(true);
+        makeVisible();
+        return;
+    }
+    if (m_pickupableByFrackMan == true && whereAmI()->closeToFrackMan(this, 3.00))   // nugget picked up by FrackMan
+    {
+        makeDead();
+        whereAmI()->playSound(SOUND_GOT_GOODIE);
+        whereAmI()->increaseScore(10);
+        whereAmI()->pickedUpByFrackMan(this, 'n');
+    }
+    // NUGGET MUST CHECK TO SEE IF IT IS PICKUPABLE BY PROTESTORS AND STUFF
+    
+    if (!m_permanentState)   // nugget is temporary (since it was dropped by FrackMan)
+    {
+        if (howManyTicksLeft() == 0)
+        {
+            makeDead();
+            return;
+        }
+        decreaseNumTicks();
+    }
+}
+
 // SONAR KIT IMPLEMENTATION ======================================================================================
 
 SonarKit::SonarKit(int startX, int startY, StudentWorld* world)
-: Goodies(IID_SONAR, startX, startY, right, 1.0, 2, true, world)
+: Goodies(IID_SONAR, startX, startY, right, 1.0, 2, true, 69, world)  // garbage numTicks right now
 {
     
 }
@@ -348,15 +421,25 @@ SonarKit::~SonarKit()
     
 }
 
+void SonarKit::doSomething()
+{
+    
+}
+
 // WATER POOL IMPLEMENTATION =====================================================================================
 
 WaterPool::WaterPool(int startX, int startY, int numTicks, StudentWorld* world)
-: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, world)
+: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, 69, world)   // garbage numTIcks right now
 {
-    m_numTicksToExist = numTicks;
+
 }
 
 WaterPool::~WaterPool()
+{
+    
+}
+
+void WaterPool::doSomething()
 {
     
 }
@@ -499,6 +582,30 @@ void FrackMan::doSomething()
             case KEY_PRESS_ESCAPE:   // END THE CURRENT LEVEL
                 makeDead();
                 break;
+                
+            case KEY_PRESS_TAB:       // FrackMan drops a nugget (and his new mixtape, which is fire)
+                if (m_numNuggets > 0)
+                {
+                    new Nugget(getX(), getY(), true, false, false, whereAmI());
+                    m_numNuggets--;
+                }
+                break;
         }
+    }
+}
+
+void FrackMan::addToInventory(Goodies *goodie, char label)
+{
+    switch (label)
+    {
+            case 'n':     // nugget
+            m_numNuggets++;
+            break;
+            case 's':     // sonar kit
+            m_numSonars++;
+            break;
+            case 'w':     // water
+            m_numSquirts++;
+            break;
     }
 }

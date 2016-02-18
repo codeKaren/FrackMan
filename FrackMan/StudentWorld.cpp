@@ -37,17 +37,22 @@ int StudentWorld::init()
     m_FrackMan = new FrackMan(this);
     
     // BEGIN TESTING CODE
-    Boulder* b1 = new Boulder(21, 24, this);
+    new Boulder(21, 24, this);
     
-    Boulder* b2 = new Boulder(21, 10, this);
+    new Boulder(21, 10, this);
     
-    cout << getRadiusBetween(b1, b2) << endl;  // should print 14
+    new Boulder(6, 8, this);
     
-    Boulder* b3 = new Boulder(6, 8, this);
+    new Boulder(0, 0, this);
     
-    Boulder* b4 = new Boulder(0, 0, this);
+    m_numBarrels = 2;
     
-    cout << getRadiusBetween(b3, b4) << endl;   // should print 10
+    new OilBarrel(60, 0, this);
+    
+    new OilBarrel(58, 6, this);
+    
+    new Nugget(50, 8, false, true, true, this);
+    
     // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;
@@ -55,10 +60,13 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
-    m_FrackMan->doSomething();
-    
     if (m_FrackMan->isStillAlive() == false)  // FRACK MAN IS DEAD NOOOOOOO
         return GWSTATUS_PLAYER_DIED;
+    
+    if (m_numBarrels == 0)
+        return GWSTATUS_FINISHED_LEVEL;
+    
+    m_FrackMan->doSomething();
     
     for (int i = 0; i < m_allActors.size(); i++)
         m_allActors[i]->doSomething();
@@ -163,6 +171,21 @@ bool StudentWorld::deleteDirt(Actor* actor)    // delete dirt based on object/s 
 void StudentWorld::addActor(Actor* actor)
 {
     m_allActors.push_back(actor);
+}
+
+void StudentWorld::decreaseBarrelNum()
+{
+    m_numBarrels--;
+}
+
+void StudentWorld::pickedUpByFrackMan(Goodies* goodie, char label)
+{
+    m_FrackMan->addToInventory(goodie, label);
+}
+
+bool StudentWorld::closeToFrackMan(Goodies* goodie, double howClose) const // returns true if FrackMan is close enough to make the goodie visible
+{
+    return (getRadiusBetween(goodie, m_FrackMan) <= howClose);
 }
 
 double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const

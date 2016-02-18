@@ -30,12 +30,19 @@ public:
     
     void addActor(Actor* actor);  // add a new actor to StudentWorld
     
+    void decreaseBarrelNum();    // decrease the number of barrels in the level by one
+    
+    void pickedUpByFrackMan(Goodies* goodie, char label);  // goodie can tell FrackMan it just received something
+    
+    bool closeToFrackMan(Goodies* goodie, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
+    
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
 private:
     Dirt* m_dirt[64][64];
     FrackMan* m_FrackMan;
     std::vector<Actor*> m_allActors;
+    int m_numBarrels;
 };
 
 #endif // STUDENTWORLD_H_
