@@ -38,6 +38,10 @@ public:
     
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
+    int max(int a, int b);  // returns the bigger number
+    
+    int min(int a, int b);  // returns the smaller number 
+    
 private:
     Dirt* m_dirt[64][64];
     FrackMan* m_FrackMan;

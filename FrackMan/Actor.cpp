@@ -410,10 +410,10 @@ void Nugget::doSomething()
 
 // SONAR KIT IMPLEMENTATION ======================================================================================
 
-SonarKit::SonarKit(int startX, int startY, StudentWorld* world)
-: Goodies(IID_SONAR, startX, startY, right, 1.0, 2, true, 69, world)  // garbage numTicks right now
+SonarKit::SonarKit(int numTicks, StudentWorld* world)
+: Goodies(IID_SONAR, 0, 60, right, 1.0, 2, true, numTicks, world)  // GARBAGE TICK NUM
 {
-    
+
 }
 
 SonarKit::~SonarKit()
@@ -423,13 +423,27 @@ SonarKit::~SonarKit()
 
 void SonarKit::doSomething()
 {
-    
+    if (!isStillAlive())    // sonar is dead, so return right away
+        return;
+    if (whereAmI()->closeToFrackMan(this, 3.00))
+    {
+        makeDead();
+        whereAmI()->playSound(SOUND_GOT_GOODIE);
+        whereAmI()->increaseScore(75);
+        whereAmI()->pickedUpByFrackMan(this, 's');
+    }
+    if (howManyTicksLeft() == 0)
+    {
+        makeDead();
+        return;
+    }
+    decreaseNumTicks();   // since always temporary, always decrease the number of ticks left
 }
 
 // WATER POOL IMPLEMENTATION =====================================================================================
 
 WaterPool::WaterPool(int startX, int startY, int numTicks, StudentWorld* world)
-: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, 69, world)   // garbage numTIcks right now
+: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, numTicks, world)  // GARBAGE TICK NUM
 {
 
 }
@@ -441,7 +455,21 @@ WaterPool::~WaterPool()
 
 void WaterPool::doSomething()
 {
-    
+    if (!isStillAlive())    // dead, so return
+        return;
+    if (whereAmI()->closeToFrackMan(this, 3.00))
+    {
+        makeDead();
+        whereAmI()->playSound(SOUND_GOT_GOODIE);
+        whereAmI()->increaseScore(100);
+        whereAmI()->pickedUpByFrackMan(this, 'w');
+    }
+    if (howManyTicksLeft() == 0)
+    {
+        makeDead();
+        return;
+    }
+    decreaseNumTicks();   // since always temporary, always decrease the number of ticks left
 }
 
 // PERSON IMPLEMENTATION =========================================================================================
@@ -590,6 +618,9 @@ void FrackMan::doSomething()
                     m_numNuggets--;
                 }
                 break;
+                
+            // CASE 'Z' or 'z' for sonar press 
+                
         }
     }
 }
@@ -605,7 +636,7 @@ void FrackMan::addToInventory(Goodies *goodie, char label)
             m_numSonars++;
             break;
             case 'w':     // water
-            m_numSquirts++;
+            m_numSquirts+=5;
             break;
     }
 }

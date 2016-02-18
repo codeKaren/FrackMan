@@ -98,7 +98,7 @@ private:
 class SonarKit: public Goodies   // GOODIE CHAR 's'
 {
 public:
-    SonarKit(int startX, int startY, StudentWorld* world);
+    SonarKit(int numTicks, StudentWorld* world);
     virtual ~SonarKit();
     virtual void doSomething();
     

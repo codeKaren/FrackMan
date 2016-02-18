@@ -53,6 +53,9 @@ int StudentWorld::init()
     
     new Nugget(50, 8, false, true, true, this);
     
+    new SonarKit((max(100, 300-10*getLevel())), this);
+    
+    new WaterPool(20, 60, (max(100, 300-10*getLevel())), this);
     // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;
@@ -193,4 +196,18 @@ double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const
     double xDistance = first->getX() - second->getX();
     double yDistance = first->getY() - second->getY();
     return sqrt(pow(xDistance,2) + pow(yDistance,2));
+}
+
+int StudentWorld::max(int a, int b)
+{
+    if (a > b)
+        return a;
+    return b;
+}
+
+int StudentWorld::min(int a, int b)
+{
+    if (a < b)
+        return a;
+    return b;
 }
