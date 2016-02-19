@@ -36,7 +36,10 @@ int StudentWorld::init()
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
+    m_numBarrels = 2;   // to ensure that the game runs
+    
     // BEGIN TESTING CODE
+    
     new Boulder(21, 24, this);
     
     new Boulder(21, 10, this);
@@ -56,6 +59,7 @@ int StudentWorld::init()
     new SonarKit((max(100, 300-10*getLevel())), this);
     
     new WaterPool(20, 60, (max(100, 300-10*getLevel())), this);
+     
     // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;
@@ -84,6 +88,8 @@ int StudentWorld::move()
         else
             it++;
     }
+    
+    setGameStatText("FRACK YOU, FRACK MAN!");   // garbage right now
     
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -153,6 +159,24 @@ bool StudentWorld::isThereObstacle(int x, int y) const    // return true if ther
     return false;
 }
 
+bool StudentWorld::diggingIntoBoulder(int x, int y, Actor* actor) const  // FrackMan must be less than 3.00 from center of boulder??
+{
+    for (int i = 0; i < m_allActors.size(); i++)
+    {
+        if (m_allActors[i]->isObstacle() == true)   // loop through all actors to find an obstacle
+        {
+            if (m_allActors[i] == actor)    // check to see if boulder is comparing the radius between itself
+                continue;
+            double xDistance = x - (m_allActors[i]->getX());
+            double yDistance = y - (m_allActors[i]->getY());
+            int radius = sqrt(pow(xDistance,2) + pow(yDistance,2));
+            if (radius <= 3.00)   // distance from FrackMan to boulder is less than 3.00
+                return true;
+        }
+    }
+    return false;
+}
+
 bool StudentWorld::deleteDirt(Actor* actor)    // delete dirt based on object/s current position
 {
     bool dirtDeleted = false;
@@ -186,9 +210,20 @@ void StudentWorld::pickedUpByFrackMan(Goodies* goodie, char label)
     m_FrackMan->addToInventory(goodie, label);
 }
 
-bool StudentWorld::closeToFrackMan(Goodies* goodie, double howClose) const // returns true if FrackMan is close enough to make the goodie visible
+bool StudentWorld::closeToFrackMan(Actor* goodie, double howClose) const // returns true if FrackMan is close enough to make the goodie visible
 {
     return (getRadiusBetween(goodie, m_FrackMan) <= howClose);
+}
+
+void StudentWorld::sonarFunction()
+{
+    for (int i = 0; i < m_allActors.size(); i++)
+    {
+        if (!m_allActors[i]->isVisible() && closeToFrackMan(m_allActors[i], 12.00))
+            {
+                m_allActors[i]->makeVisible();
+            }
+    }
 }
 
 double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const

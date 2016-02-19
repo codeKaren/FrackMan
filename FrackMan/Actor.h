@@ -15,11 +15,15 @@ public:
     virtual void doSomething() = 0;
     bool isStillAlive() const;
     void makeDead();
+    bool isVisible() const;   // returns true if visible by FrackMan
+    void makeVisible();  // sets m_visible to true
     virtual bool isObstacle() const;    // returns true if object is an obstacle (currently only boulders)
     StudentWorld* whereAmI() const;
+    virtual void tryToMove(Direction direction);   // used inside doSomething()
     
 private:
     bool m_stillAlive;
+    bool m_visible;
     StudentWorld* m_studentWorld;
 };
 
@@ -62,12 +66,9 @@ class Goodies: public Actor
 public:
     Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, int numTicks, StudentWorld* world);
     virtual ~Goodies();
-    bool isVisible() const;   // returns true if visible by FrackMan
-    void makeVisible();  // sets m_visible to true
     int howManyTicksLeft() const;   // returns how many ticks the goodie has left before it must disappear
     void decreaseNumTicks();  // decreases the number of ticks by one
 private:
-    bool m_visible;
     int m_numTicks;
 };
 
@@ -134,12 +135,12 @@ public:
     virtual ~FrackMan();
     virtual void doSomething();
     void addToInventory(Goodies* goodie, char label);
-    void attemptToMove(Direction direction, int addToX, int addToY, int obstacleX, int obstacleY);
     
 private:
     int m_numSquirts;
     int m_numSonars;
     int m_numNuggets;
+    void moveOrDig(Direction direction, int addToX, int addToY);  // let FrackMan move or dig, used in doSomething()
 };
 
 #endif // ACTOR_H_

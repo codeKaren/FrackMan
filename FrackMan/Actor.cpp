@@ -10,6 +10,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, floa
 :GraphObject(imageID, startX, startY, startDirection, size, depth)
 {
     m_stillAlive = true;
+    m_visible = visible;
     setVisible(visible);
     m_studentWorld = world;
 }
@@ -27,6 +28,17 @@ void Actor::makeDead()
     m_stillAlive = false;
 }
 
+bool Actor::isVisible() const
+{
+    return m_visible;
+}
+
+void Actor::makeVisible()
+{
+    m_visible = true;
+    setVisible(true);
+}
+
 StudentWorld* Actor::whereAmI() const
 {
     return m_studentWorld;
@@ -35,6 +47,56 @@ StudentWorld* Actor::whereAmI() const
 bool Actor::isObstacle() const
 {
     return false;
+}
+
+void Actor::tryToMove(Direction direction)
+{
+    int addToX = 0;     // modify x or y for each possible direction to move in
+    int addToY = 0;
+    int obstacleX = 0;
+    int obstacleY = 0;
+    switch (direction)
+    {
+        case left:
+            addToX = -1; obstacleX = -1; break;
+        case right:
+            addToX = 1; obstacleX = 4; break;
+        case down:
+            addToY = -1; obstacleY = -1; break;
+        case up:
+            addToY = 1; obstacleY = 4; break;
+        case none:
+            break;
+    }
+    
+    if (getX()+addToX < 0 || getX()+addToX > 60 || getY()+addToY < 0 || getY()+addToY > 60)  // gone out of bounds
+    {
+        makeDead();
+        return;
+    }
+    else if (direction == left || direction == right)
+    {
+        for (int k = getY(); k < getY() + 4; k++)   // runs into obstacle or dirt
+        {
+            if (whereAmI()->isThereDirt(getX() + obstacleX, k) || whereAmI()->diggingIntoBoulder(getX(), k, this))
+            {
+                makeDead();
+                return;
+            }
+        }
+    }
+    else if (direction == down || direction == up)
+    {
+        for (int k = getX(); k < getX() + 4; k++)
+        {
+            if (whereAmI()->isThereDirt(k, getY()+ obstacleY) || whereAmI()->diggingIntoBoulder(k, getY(), this))
+            {
+                makeDead();
+                return;
+            }
+        }
+    }
+    moveTo(getX()+addToX, getY()+addToY);    // the space in front is open, so move!
 }
 
 // DIRT IMPLEMENTATION ===========================================================================================
@@ -91,31 +153,19 @@ void Boulder::doSomething()
         if (numTicksWaiting >= 30)
         {
             if (numTicksWaiting == 30)
-                whereAmI()->playSound(SOUND_FALLING_ROCK);       // only plays the sound one time
-            if (getY()-1 < 0)         // hits the bottom of the oil field
+                whereAmI()->playSound(SOUND_FALLING_ROCK);       // only plays the sound one time 
+
+            tryToMove(down);  // move downward
+            
+            // if there is boulder directly below, kill the current boulder
+            if (whereAmI()->isThereObstacle(getX(), getY()-1))
             {
                 makeDead();
                 return;
             }
-            for (int i = getX(); i < getX() + 4; i++)   // make sure to check the whole width of the boulder
-            {
-                if (whereAmI()->isThereDirt(i, getY()-1))  // runs into dirt under it
-                {
-                    makeDead();
-                    return;
-                }
-                
-                if (whereAmI()->isThereObstacle(i, getY()-1))   // runs into an obstacle below it
-                {
-                    makeDead();
-                    return;
-                }
-            }
             
-            // the boulder doesn't have anything underneath it, so it can fall
-            moveTo(getX(), getY()-1);
+            // ADD CODE FOR WHEN BOULDER HITS PROTESTORS OR FRACKMAN
             
-            // ADD CODE FOR WHEN BOULDER HITS PROTESTORS, ETC.
         }
             numTicksWaiting++;
     }
@@ -132,6 +182,19 @@ Squirt::Squirt(int x, int y, Direction direction, StudentWorld* world)
 :Actor(IID_WATER_SPURT, x, y, direction, 1.0, 1, true, world)
 {
     m_travelDistance = 4;
+    
+    // check to see if there is dirt in front of FrackMan (no squirt can be put there)
+    for (int i = getX(); i < getX() + 4; i++)
+    {
+        for (int j = getY(); j < getY() + 4; j++)
+        {
+            if (whereAmI()->isThereDirt(i, j))    // dirt found
+            {
+                makeDead();
+                return;
+            }
+        }
+    }
 }
 
 Squirt::~Squirt()
@@ -151,139 +214,23 @@ void Squirt::doSomething()
     
     else
     {
-
-        // check to see if there is dirt in front of FrackMan (no squirt can be put there)
-        for (int i = getX(); i < getX() + 4; i++)
-        {
-            for (int j = getY(); j < getY() + 4; j++)
-            {
-                if (whereAmI()->isThereDirt(i, j))    // dirt found
-                {
-                    makeDead();
-                    return;
-                }
-            }
-        }
-
-        // Squirt can be generated in front of FrackMan, so check to see if it can move around
-        switch (getDirection())
+        switch (getDirection())    // for each direction
         {
             case left:
-                if (getX()-1 < 0 || getX()-1 > 60)     // gone out of bounds
-                {
-                    makeDead();
-                    return;
-                }
-                else if(whereAmI()->isThereObstacle(getX()-1, getY()))   // location occupied by boulder
-                {
-                    makeDead();
-                    return;
-                }
-                else
-                {
-                    // check to see if there is dirt on the left side
-                    for (int k = getY(); k < getY() + 4; k++)
-                    {
-                        if (whereAmI()->isThereDirt(getX()-1, k))
-                        {
-                            makeDead();
-                            return;
-                        }
-                    }
-                    
-                    // no dirt found on the left, so move over one square to the left (to the left, everything you own in a box to the left)
-                    moveTo(getX()-1, getY());
-                    decreaseDistance();
-                    return;
-                }
+                tryToMove(left);      // try to to move in that direction
+                decreaseDistance();   // decrease the distance that the squirt can continue to travel for
                 break;
-                
             case right:
-                if (getX()+1 < 0 || getX()+1 > 60)
-                {
-                    makeDead();
-                    return;
-                }
-                else if(whereAmI()->isThereObstacle(getX()+4, getY()))
-                {
-                    makeDead();
-                    return;
-                }
-                else
-                {
-                    // check to see if there is dirt on the right side
-                    for (int k = getY(); k < getY() + 4; k++)
-                    {
-                        if (whereAmI()->isThereDirt(getX()+4, k))    // +4 because x,y is the lower left corner
-                        {
-                            makeDead();
-                            return;
-                        }
-                    }
-                    
-                    // no dirt found on the right, so move over one square
-                    moveTo(getX()+1, getY());
-                    decreaseDistance();
-                    return;
-                }
+                tryToMove(right);
+                decreaseDistance();
                 break;
             case down:
-                if (getY()-1 < 0 || getY()-1 > 60)
-                {
-                    makeDead();
-                    return;
-                }
-                else if (whereAmI()->isThereObstacle(getX(), getY()-1))
-                {
-                    makeDead();
-                    return;
-                }
-                else
-                {
-                    // check to see if there is dirt on the bottom
-                    for (int k = getX(); k < getX() + 4; k++)
-                    {
-                        if (whereAmI()->isThereDirt(k, getY()-1))
-                        {
-                            makeDead();
-                            return;
-                        }
-                    }
-                    
-                    // no dirt on the bottom, so move down
-                    moveTo(getX(), getY() - 1);
-                    decreaseDistance();
-                    return;
-                }
+                tryToMove(down);
+                decreaseDistance();
                 break;
             case up:
-                if (getY()+1 < 0 || getY()+1 > 60)
-                {
-                    makeDead();
-                    return;
-                }
-                else if(whereAmI()->isThereObstacle(getX(), getY()+4))
-                {
-                    makeDead();
-                    return;
-                }
-                else
-                {
-                    // check to see if there is dirt on the top
-                    for (int k = getX(); k < getX() + 4; k++)
-                    {
-                        if (whereAmI()->isThereDirt(k, getY()+4))
-                        {
-                            makeDead();
-                            return;
-                        }
-                    }
-                    
-                    // no dirt on the top, so move up
-                    moveTo(getX(), getY() + 1);
-                    decreaseDistance();
-                    return;
-                }
+                tryToMove(up);
+                decreaseDistance();
                 break;
             case none:
                 break;
@@ -301,25 +248,13 @@ void Squirt::decreaseDistance()
 Goodies::Goodies(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, bool visible, int numTicks, StudentWorld* world)
 : Actor(imageID, startX, startY, startDirection, size, depth, visible, world)
 {
-    setVisible(visible);
     whereAmI()->addActor(this);
-    m_visible = visible;
     m_numTicks = numTicks;
 }
 
 Goodies::~Goodies()
 {
     
-}
-
-bool Goodies::isVisible() const
-{
-    return m_visible;
-}
-
-void Goodies::makeVisible()
-{
-    m_visible = true;
 }
 
 int Goodies::howManyTicksLeft() const  // returns how many ticks the goodie has left before it must disappear
@@ -351,7 +286,6 @@ void OilBarrel::doSomething()
         return;
     if (isVisible() == false && whereAmI()->closeToFrackMan(this, 4.00))   // FrackMan is discovers the OilBarrel
     {
-        setVisible(true);
         makeVisible();
         return;
     }
@@ -384,7 +318,6 @@ void Nugget::doSomething()
         return;
     if (!isVisible() && whereAmI()->closeToFrackMan(this, 4.00))   // FrackMan discovers the nugget
     {
-        setVisible(true);
         makeVisible();
         return;
     }
@@ -507,72 +440,16 @@ void FrackMan::doSomething()
         switch (keyPressed)
         {
             case KEY_PRESS_LEFT:
-//                if (getDirection() != left)     // only turn FrackMan in the correct direction, DON'T MOVE
-//                {
-//                    setDirection(left);
-//                    return;
-//                }
-//                if (getX()-1 < 0 || getX()-1 > 60)    // gone out of bounds
-//                    moveTo(getX(), getY());   // stay in the same position but maintain animations
-//                else if(whereAmI()->isThereObstacle(getX()-1, getY()))  // can't dig into boulder
-//                        break;
-//                else
-//                    moveTo(getX()-1, getY());     // since it is a valid position, move to that position
-//                if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
-//                    whereAmI()->playSound(SOUND_DIG);
-//                break;
-                attemptToMove(left, -1, 0, -1, 0);
+                moveOrDig(left, -1, 0);
                 break;
             case KEY_PRESS_RIGHT:
-//                if (getDirection() != right)
-//                {
-//                    setDirection(right);
-//                    return;
-//                }
-//                if (getX()+1 < 0 || getX()+1 > 60)
-//                    moveTo(getX(), getY());
-//                else if(whereAmI()->isThereObstacle(getX()+4, getY()))  // must do +4 because getX() is the lower left corner
-//                    break;
-//                else
-//                    moveTo(getX()+1, getY());
-//                if (whereAmI()->deleteDirt(this))
-//                    whereAmI()->playSound(SOUND_DIG);
-//                break;
-                attemptToMove(right, 1, 0, 4, 0);
+                moveOrDig(right, 1, 0);
                 break;
             case KEY_PRESS_DOWN:
-//                if (getDirection() != down)
-//                {
-//                    setDirection(down);
-//                    return;
-//                }
-//                if (getY()-1 < 0 || getY()-1 > 60)
-//                    moveTo(getX(), getY());
-//                else if(whereAmI()->isThereObstacle(getX(), getY()-1))
-//                    break;
-//                else
-//                    moveTo(getX(), getY()-1);
-//                if (whereAmI()->deleteDirt(this))
-//                    whereAmI()->playSound(SOUND_DIG);
-//                break;
-                attemptToMove(down, 0, -1, 0, -1);
+                moveOrDig(down, 0, -1);
                 break;
             case KEY_PRESS_UP:
-//                if (getDirection() != up)     
-//                {
-//                    setDirection(up);
-//                    return;
-//                }
-//                if (getY()+1 < 0 || getY()+1 > 60)
-//                    moveTo(getX(), getY());
-//                else if(whereAmI()->isThereObstacle(getX(), getY()+4))
-//                    break;
-//                else
-//                    moveTo(getX(), getY()+1);
-//                if (whereAmI()->deleteDirt(this))
-//                    whereAmI()->playSound(SOUND_DIG);
-//                break;
-                attemptToMove(up, 0, 1, 0, 4);
+                moveOrDig(up, 0, 1);
                 break;
             case KEY_PRESS_SPACE:     // SQUIRT TIME
                 if (m_numSquirts > 0)    // still has squirts left
@@ -625,6 +502,12 @@ void FrackMan::doSomething()
             case 'z':
             case 'Z':
                 // implement the sonar functions
+                if (m_numSonars > 0)
+                {
+                    whereAmI()->playSound(SOUND_SONAR);
+                    m_numSonars--;
+                    whereAmI()->sonarFunction();  // make all hidden objects within a radius of 12 become visible
+                }
                 break;
                 
         }
@@ -647,7 +530,7 @@ void FrackMan::addToInventory(Goodies *goodie, char label)
     }
 }
 
-void FrackMan::attemptToMove(Direction direction, int addToX, int addToY, int obstacleX, int obstacleY)
+void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
 {
     if (getDirection() != direction)    // only turn FrackMan in the current direction, DON'T MOVE
     {
@@ -658,7 +541,7 @@ void FrackMan::attemptToMove(Direction direction, int addToX, int addToY, int ob
     if (getX()+addToX < 0 || getX()+addToX > 60 || getY()+addToY < 0 || getY()+addToY > 60)    // gone out of bounds
         moveTo(getX(), getY());   // stay in the same position but maintain animations
     
-    else if(whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))  // can't dig into boulder
+    else if(whereAmI()->diggingIntoBoulder(getX()+addToX, getY()+addToY, this))  // can't dig into boulder
         return;
     
     else     // no boulders and not out of bounds, so move

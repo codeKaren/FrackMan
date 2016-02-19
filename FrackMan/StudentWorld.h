@@ -26,6 +26,8 @@ public:
     
     bool isThereObstacle(int x, int y) const;  // returns true if there is an obstacle in the specifed spot (boulder)
     
+    bool diggingIntoBoulder(int x, int y, Actor* actor) const;  // returns true if FrackMan is going to dig into a boulder
+    
     bool deleteDirt(Actor* actor);   // deletes dirt in position currently occupied by an actor
     
     void addActor(Actor* actor);  // add a new actor to StudentWorld
@@ -34,7 +36,9 @@ public:
     
     void pickedUpByFrackMan(Goodies* goodie, char label);  // goodie can tell FrackMan it just received something
     
-    bool closeToFrackMan(Goodies* goodie, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
+    bool closeToFrackMan(Actor* goodie, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
+    
+    void sonarFunction();  // makes all game objects within a radius of 12 visible
     
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
