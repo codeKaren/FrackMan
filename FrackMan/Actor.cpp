@@ -601,6 +601,7 @@ Protester::Protester(StudentWorld* world)
     m_numTicksTotal = whereAmI()->max(0, 3-(whereAmI()->getLevel())/4);
     m_numTicksLeft = m_numTicksTotal;
     m_leaveOilFieldState = false;
+    m_numTicksSinceShout = 15;
 }
 
 Protester::~Protester()
@@ -629,7 +630,14 @@ void Protester::doSomething()
             // a single data structure that enables all protesters to determine their optimal path regardless of location???
         }
     }
-    
+    else if (whereAmI()->closeToFrackMan(this, 4.00) && isFacingFrackMan())  // AND MUST BE FACING FRACKMAN
+    {
+        if (getNumTicksSinceShout() == 0)  // hasn't shouted for 15 non-resting ticks
+        {
+            whereAmI()->playSound(SOUND_PROTESTER_YELL);
+            // add more stuff later, i'm tired as fuck     TIME: 2:34am 
+        }
+    }
 }
 
 void Protester::getAnnoyed()
@@ -667,6 +675,22 @@ void Protester::setLeaveOilField()
 {
     m_leaveOilFieldState = true;
 }
+
+bool Protester::isFacingFrackMan()  // GARBAGE VALUES RIGHT NOW
+{
+    return true;
+}
+
+int Protester::getNumTicksSinceShout() const
+{
+    return m_numTicksSinceShout;
+}
+
+void Protester::shoutSoon()
+{
+    m_numTicksSinceShout--;
+}
+
 
 // HARDCOREPROTESTOR IMPLEMENTATION ==================================================================================
 

@@ -161,12 +161,16 @@ public:
     void timePasses(); // decrements m_numTicksLeft
     bool isLeaveOilFieldState() const; // returns m_leaveOilFieldState
     void setLeaveOilField(); // changes m_leaveOilFieldState to true
+    bool isFacingFrackMan();  // return true if the protester is facing FrackMan
+    int getNumTicksSinceShout() const;  // return m_numTicksShinceShout
+    void shoutSoon(); // decrements m_numTicksSinceShout
     
 private:
     int m_numSquaresToMoveInCurrentDirection;
     int m_numTicksTotal;
     int m_numTicksLeft;
-    bool m_leaveOilFieldState;
+    int m_numTicksSinceShout;
+    int m_leaveOilFieldState;
     int howManySquaresInCurrentDir();
 };
 
