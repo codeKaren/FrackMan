@@ -78,7 +78,7 @@ void Actor::tryToMove(Direction direction)
     {
         for (int k = getY(); k < getY() + 4; k++)   // runs into obstacle or dirt
         {
-            if (whereAmI()->isThereDirt(getX() + obstacleX, k) || whereAmI()->diggingIntoBoulder(getX(), k, this))
+            if (whereAmI()->isThereDirt(getX() + obstacleX, k) || whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))
             {
                 makeDead();
                 return;
@@ -89,7 +89,7 @@ void Actor::tryToMove(Direction direction)
     {
         for (int k = getX(); k < getX() + 4; k++)
         {
-            if (whereAmI()->isThereDirt(k, getY()+ obstacleY) || whereAmI()->diggingIntoBoulder(k, getY(), this))
+            if (whereAmI()->isThereDirt(k, getY()+ obstacleY) || whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))
             {
                 makeDead();
                 return;
@@ -97,6 +97,11 @@ void Actor::tryToMove(Direction direction)
         }
     }
     moveTo(getX()+addToX, getY()+addToY);    // the space in front is open, so move!
+}
+
+bool Actor::canGetAnnoyed()
+{
+    return false;
 }
 
 // DIRT IMPLEMENTATION ===========================================================================================
@@ -164,7 +169,8 @@ void Boulder::doSomething()
                 return;
             }
             
-            // ADD CODE FOR WHEN BOULDER HITS PROTESTORS OR FRACKMAN
+            // boulder sees if it hits FrackMan or protesters
+            whereAmI()->boulderSmash(this);
             
         }
             numTicksWaiting++;
@@ -194,6 +200,13 @@ Squirt::Squirt(int x, int y, Direction direction, StudentWorld* world)
                 return;
             }
         }
+    }
+    
+    // check to see if there is a boulder near the starting location of the squirt 
+    if (whereAmI()->radiusCloseToBoulder(x, y, this))
+    {
+        makeDead();
+        return;
     }
 }
 
@@ -416,6 +429,22 @@ Person::Person(int imageID, int startX, int startY, Direction startDirection, fl
 Person::~Person()
 { }
 
+bool Person::canGetAnnoyed() const
+{
+    return true;
+}
+
+void Person::decreaseHealthPoints(int howMany)
+{
+    m_healthPoints -= howMany;
+    // check if it's dead???
+}
+
+int Person::getHealthPoints() const
+{
+    return m_healthPoints;
+}
+
 // FRACKMAN IMPLEMENTATION =======================================================================================
 
 FrackMan::FrackMan(StudentWorld* world)
@@ -434,6 +463,12 @@ void FrackMan::doSomething()
 {
     if (!isStillAlive())
         return;
+    if (getHealthPoints() <= 0)
+    {
+        makeDead();
+        whereAmI()->playSound(SOUND_PLAYER_GIVE_UP);
+        whereAmI()->decLives();
+    }
     int keyPressed;
     if (whereAmI()->getKey(keyPressed) == true)
     {
@@ -490,6 +525,7 @@ void FrackMan::doSomething()
                 
             case KEY_PRESS_ESCAPE:   // END THE CURRENT LEVEL
                 makeDead();
+                whereAmI()->decLives();
                 break;
                 
             case KEY_PRESS_TAB:       // FrackMan drops a nugget (and his new mixtape, which is fire)
@@ -512,6 +548,11 @@ void FrackMan::doSomething()
                 
         }
     }
+}
+
+void FrackMan::getAnnoyed()
+{
+    
 }
 
 void FrackMan::addToInventory(Goodies *goodie, char label)
@@ -541,7 +582,7 @@ void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
     if (getX()+addToX < 0 || getX()+addToX > 60 || getY()+addToY < 0 || getY()+addToY > 60)    // gone out of bounds
         moveTo(getX(), getY());   // stay in the same position but maintain animations
     
-    else if(whereAmI()->diggingIntoBoulder(getX()+addToX, getY()+addToY, this))  // can't dig into boulder
+    else if(whereAmI()->radiusCloseToBoulder(getX()+addToX, getY()+addToY, this))  // can't dig into boulder
         return;
     
     else     // no boulders and not out of bounds, so move
@@ -550,3 +591,104 @@ void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
     if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
         whereAmI()->playSound(SOUND_DIG);
 }
+
+// PROTESTOR IMPLEMENTATION ===========================================================================================
+
+Protester::Protester(StudentWorld* world)
+: Person(IID_PROTESTER, 60, 60, left, 1.0, 0, 5, world)
+{
+    m_numSquaresToMoveInCurrentDirection = howManySquaresInCurrentDir();
+    m_numTicksTotal = whereAmI()->max(0, 3-(whereAmI()->getLevel())/4);
+    m_numTicksLeft = m_numTicksTotal;
+    m_leaveOilFieldState = false;
+}
+
+Protester::~Protester()
+{
+    
+}
+
+void Protester::doSomething()
+{
+    if (!isStillAlive())
+        return;
+    if (getNumTicksLeft() > 0)
+    {
+        timePasses();
+        return;
+    }
+    
+    // Protester is not resting during this tick so...
+    if (isLeaveOilFieldState()) // protester is in a leave-the-oil-field state
+    {
+        if (getX() == 60 && getY() == 60)
+            makeDead();
+        else
+        {
+            // move one step closer to the exit (60, 60) by using a queue-based maze-searching algorithm
+            // a single data structure that enables all protesters to determine their optimal path regardless of location???
+        }
+    }
+    
+}
+
+void Protester::getAnnoyed()
+{
+    
+}
+
+int Protester::howManySquaresInCurrentDir()
+{
+    // generate a random number where 8 <= n <= 60
+    return 10;   // garbage right now
+}
+
+int Protester::getNumTicksTotal() const
+{
+    return m_numTicksTotal;
+}
+
+int Protester::getNumTicksLeft() const
+{
+    return m_numTicksLeft;
+}
+
+void Protester::timePasses()
+{
+    m_numTicksLeft--;
+}
+
+bool Protester::isLeaveOilFieldState() const
+{
+    return m_leaveOilFieldState;
+}
+
+void Protester::setLeaveOilField()
+{
+    m_leaveOilFieldState = true;
+}
+
+// HARDCOREPROTESTOR IMPLEMENTATION ==================================================================================
+
+HardcoreProtester::HardcoreProtester(StudentWorld* world)
+: Protester(world)
+{
+    
+}
+
+HardcoreProtester::~HardcoreProtester()
+{
+    
+}
+
+void HardcoreProtester::doSomething()
+{
+    if (!isStillAlive())
+        return;
+}
+
+void HardcoreProtester::getAnnoyed()
+{
+    
+}
+

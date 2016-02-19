@@ -20,6 +20,7 @@ public:
     virtual bool isObstacle() const;    // returns true if object is an obstacle (currently only boulders)
     StudentWorld* whereAmI() const;
     virtual void tryToMove(Direction direction);   // used inside doSomething()
+    virtual bool canGetAnnoyed();  // returns true if it is a Person class object 
     
 private:
     bool m_stillAlive;
@@ -123,6 +124,10 @@ class Person: public Actor
 public:
     Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP, StudentWorld* world);
     virtual ~Person();
+    virtual bool canGetAnnoyed() const; // returns true for objects derived from this class
+    virtual void getAnnoyed() = 0;
+    void decreaseHealthPoints(int howMany);  // decreases m_healthPoints by the number specified in the parameter
+    int getHealthPoints() const;  // returns m_healthPoints
     
 private:
     int m_healthPoints;
@@ -134,6 +139,7 @@ public:
     FrackMan(StudentWorld* world);
     virtual ~FrackMan();
     virtual void doSomething();
+    virtual void getAnnoyed();
     void addToInventory(Goodies* goodie, char label);
     
 private:
@@ -141,6 +147,39 @@ private:
     int m_numSonars;
     int m_numNuggets;
     void moveOrDig(Direction direction, int addToX, int addToY);  // let FrackMan move or dig, used in doSomething()
+};
+
+class Protester: public Person
+{
+public:
+    Protester(StudentWorld* world);
+    virtual ~Protester();
+    virtual void doSomething();
+    virtual void getAnnoyed();
+    int getNumTicksTotal() const; // returns m_numTicksWaiting
+    int getNumTicksLeft() const; // returns m_numTicksLeft
+    void timePasses(); // decrements m_numTicksLeft
+    bool isLeaveOilFieldState() const; // returns m_leaveOilFieldState
+    void setLeaveOilField(); // changes m_leaveOilFieldState to true
+    
+private:
+    int m_numSquaresToMoveInCurrentDirection;
+    int m_numTicksTotal;
+    int m_numTicksLeft;
+    bool m_leaveOilFieldState;
+    int howManySquaresInCurrentDir();
+};
+
+class HardcoreProtester: public Protester
+{
+public:
+    HardcoreProtester(StudentWorld* world);
+    virtual ~HardcoreProtester();
+    virtual void doSomething();
+    virtual void getAnnoyed();
+    
+private:
+    
 };
 
 #endif // ACTOR_H_

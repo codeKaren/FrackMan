@@ -159,11 +159,11 @@ bool StudentWorld::isThereObstacle(int x, int y) const    // return true if ther
     return false;
 }
 
-bool StudentWorld::diggingIntoBoulder(int x, int y, Actor* actor) const  // FrackMan must be less than 3.00 from center of boulder??
+bool StudentWorld::radiusCloseToBoulder(int x, int y, Actor* actor) const  // FrackMan must be less than 3.00 from center of boulder??
 {
     for (int i = 0; i < m_allActors.size(); i++)
     {
-        if (m_allActors[i]->isObstacle() == true)   // loop through all actors to find an obstacle
+        if (m_allActors[i]->isObstacle() == true)   // loop through all actors to find an obstacle (boulder)
         {
             if (m_allActors[i] == actor)    // check to see if boulder is comparing the radius between itself
                 continue;
@@ -175,6 +175,28 @@ bool StudentWorld::diggingIntoBoulder(int x, int y, Actor* actor) const  // Frac
         }
     }
     return false;
+}
+
+void StudentWorld::boulderSmash(Boulder* smasher)
+{
+    if (closeToFrackMan(smasher, 3.00))   // boulder hits FrackMan
+    {
+        m_FrackMan->decreaseHealthPoints(100);    // decreases health points by 100
+        m_FrackMan->makeDead();   // then FrackMan immediately loses a life
+        decLives();
+        playSound(SOUND_PLAYER_GIVE_UP);
+    }
+    
+    for (int i = 0; i < m_allActors.size(); i++)
+    {
+        if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find a protestor
+        {
+            if (getRadiusBetween(m_allActors[i], smasher) <= 3.00)
+            {
+                // how to call decreaseHealthPoints using a Actor class pointer??? HALP PLS
+            }
+        }
+    }
 }
 
 bool StudentWorld::deleteDirt(Actor* actor)    // delete dirt based on object/s current position
