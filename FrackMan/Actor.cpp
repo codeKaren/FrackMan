@@ -49,7 +49,7 @@ bool Actor::isObstacle() const
     return false;
 }
 
-void Actor::tryToMove(Direction direction)
+bool Actor::canMove(Direction direction) const
 {
     int addToX = 0;     // modify x or y for each possible direction to move in
     int addToY = 0;
@@ -71,8 +71,7 @@ void Actor::tryToMove(Direction direction)
     
     if (getX()+addToX < 0 || getX()+addToX > 60 || getY()+addToY < 0 || getY()+addToY > 60)  // gone out of bounds
     {
-        makeDead();
-        return;
+        return false;
     }
     else if (direction == left || direction == right)
     {
@@ -80,8 +79,7 @@ void Actor::tryToMove(Direction direction)
         {
             if (whereAmI()->isThereDirt(getX() + obstacleX, k) || whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))
             {
-                makeDead();
-                return;
+                return false;
             }
         }
     }
@@ -91,12 +89,40 @@ void Actor::tryToMove(Direction direction)
         {
             if (whereAmI()->isThereDirt(k, getY()+ obstacleY) || whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))
             {
-                makeDead();
-                return;
+                return false;
             }
         }
     }
-    moveTo(getX()+addToX, getY()+addToY);    // the space in front is open, so move!
+    return true;  // no dirt or obstacles, so can move
+}
+
+bool Actor::tryToMove(Direction direction)
+{
+    int addToX = 0;     // modify x or y for each possible direction to move in
+    int addToY = 0;
+    switch (direction)
+    {
+        case left:
+            addToX = -1; break;
+        case right:
+            addToX = 1; break;
+        case down:
+            addToY = -1; break;
+        case up:
+            addToY = 1; break;
+        case none:
+            break;
+    }
+    if (canMove(direction))
+    {
+        moveTo(getX()+addToX, getY()+addToY);    // the space in front is open, so move!
+        return true;
+    }
+    else
+    {
+        makeDead();
+        return false;
+    }
 }
 
 bool Actor::canGetAnnoyed()
@@ -550,9 +576,9 @@ void FrackMan::doSomething()
     }
 }
 
-void FrackMan::getAnnoyed()
+void FrackMan::getAnnoyed(int decreaseHP)
 {
-    
+    decreaseHealthPoints(decreaseHP);   // decrease health points by a specified amount
 }
 
 void FrackMan::addToInventory(Goodies *goodie, char label)
@@ -602,6 +628,7 @@ Protester::Protester(StudentWorld* world)
     m_numTicksLeft = m_numTicksTotal;
     m_leaveOilFieldState = false;
     m_numTicksSinceShout = 15;
+    whereAmI()->addActor(this);
 }
 
 Protester::~Protester()
@@ -628,6 +655,7 @@ void Protester::doSomething()
         {
             // move one step closer to the exit (60, 60) by using a queue-based maze-searching algorithm
             // a single data structure that enables all protesters to determine their optimal path regardless of location???
+            // have a 64 by 64 2D array that holds the direction that the protester should move in to get to the exit
         }
     }
     else if (whereAmI()->closeToFrackMan(this, 4.00) && isFacingFrackMan())  // AND MUST BE FACING FRACKMAN
@@ -635,12 +663,19 @@ void Protester::doSomething()
         if (getNumTicksSinceShout() == 0)  // hasn't shouted for 15 non-resting ticks
         {
             whereAmI()->playSound(SOUND_PROTESTER_YELL);
-            // add more stuff later, i'm tired as fuck     TIME: 2:34am 
+            whereAmI()->annoyFrackMan(2);
+            setNumTicksShout(15);  // reset the number of ticks for the Protester to wait
+            return;
         }
     }
+    else if (isInLineOfSight() && !whereAmI()->closeToFrackMan(this, 4.00) && canMoveToFrackMan())
+    {
+        
+    }
+    shoutSoon();  // decrease the number of ticks that FrackMan must wait to shout
 }
 
-void Protester::getAnnoyed()
+void Protester::getAnnoyed(int decreaseHP)
 {
     
 }
@@ -676,9 +711,24 @@ void Protester::setLeaveOilField()
     m_leaveOilFieldState = true;
 }
 
-bool Protester::isFacingFrackMan()  // GARBAGE VALUES RIGHT NOW
+bool Protester::isFacingFrackMan() const // GARBAGE VALUES RIGHT NOW;   HOW TO IMPLEMENT THIS???
 {
     return true;
+}
+
+bool Protester::isInLineOfSight() const // GARBAGE VALUES RIGHT NOW;   HOW TO IMPLEMENT???
+{
+    return true;
+}
+
+bool Protester::canMoveToFrackMan() // returns true unless Protester runs into dirt or something
+{
+    while (canMove(right))  // if you can still move forward;  GARBAGE RIGHT NOW
+    {
+        if (whereAmI()->closeToFrackMan(this, 4.00))  // reaches FrackMan
+            return true;
+    }
+    return false;
 }
 
 int Protester::getNumTicksSinceShout() const
@@ -689,6 +739,11 @@ int Protester::getNumTicksSinceShout() const
 void Protester::shoutSoon()
 {
     m_numTicksSinceShout--;
+}
+
+void Protester::setNumTicksShout(int numTicksShout)
+{
+    m_numTicksSinceShout = numTicksShout;
 }
 
 
@@ -711,7 +766,7 @@ void HardcoreProtester::doSomething()
         return;
 }
 
-void HardcoreProtester::getAnnoyed()
+void HardcoreProtester::getAnnoyed(int decreaseHP)
 {
     
 }

@@ -18,8 +18,9 @@ public:
     bool isVisible() const;   // returns true if visible by FrackMan
     void makeVisible();  // sets m_visible to true
     virtual bool isObstacle() const;    // returns true if object is an obstacle (currently only boulders)
-    StudentWorld* whereAmI() const;
-    virtual void tryToMove(Direction direction);   // used inside doSomething()
+    StudentWorld* whereAmI() const;  // returns m_studentWorld
+    bool canMove(Direction direction) const;  // returns true if the actor can move in the specified direction
+    bool tryToMove(Direction direction);   // used inside doSomething()
     virtual bool canGetAnnoyed();  // returns true if it is a Person class object 
     
 private:
@@ -125,7 +126,7 @@ public:
     Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP, StudentWorld* world);
     virtual ~Person();
     virtual bool canGetAnnoyed() const; // returns true for objects derived from this class
-    virtual void getAnnoyed() = 0;
+    virtual void getAnnoyed(int decreaseHP) = 0;
     void decreaseHealthPoints(int howMany);  // decreases m_healthPoints by the number specified in the parameter
     int getHealthPoints() const;  // returns m_healthPoints
     
@@ -139,7 +140,7 @@ public:
     FrackMan(StudentWorld* world);
     virtual ~FrackMan();
     virtual void doSomething();
-    virtual void getAnnoyed();
+    virtual void getAnnoyed(int decreaseHP);
     void addToInventory(Goodies* goodie, char label);
     
 private:
@@ -155,15 +156,18 @@ public:
     Protester(StudentWorld* world);
     virtual ~Protester();
     virtual void doSomething();
-    virtual void getAnnoyed();
+    virtual void getAnnoyed(int decreaseHP);
     int getNumTicksTotal() const; // returns m_numTicksWaiting
     int getNumTicksLeft() const; // returns m_numTicksLeft
     void timePasses(); // decrements m_numTicksLeft
     bool isLeaveOilFieldState() const; // returns m_leaveOilFieldState
     void setLeaveOilField(); // changes m_leaveOilFieldState to true
-    bool isFacingFrackMan();  // return true if the protester is facing FrackMan
-    int getNumTicksSinceShout() const;  // return m_numTicksShinceShout
+    bool isFacingFrackMan() const;  // return true if the protester is facing FrackMan
+    bool isInLineOfSight() const;  // returns true if the protester is in horizontal or vertical line of sight of FrackMan
+    bool canMoveToFrackMan();  // returns true if the protester can continue moving in the current direction to reach FrackMan
+    int getNumTicksSinceShout() const;  // return m_numTicksSinceShout
     void shoutSoon(); // decrements m_numTicksSinceShout
+    void setNumTicksShout(int numTicksShout);  // change the value of m_numTicksSinceShout
     
 private:
     int m_numSquaresToMoveInCurrentDirection;
@@ -180,7 +184,7 @@ public:
     HardcoreProtester(StudentWorld* world);
     virtual ~HardcoreProtester();
     virtual void doSomething();
-    virtual void getAnnoyed();
+    virtual void getAnnoyed(int decreaseHP);
     
 private:
     

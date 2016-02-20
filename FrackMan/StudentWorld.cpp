@@ -59,6 +59,8 @@ int StudentWorld::init()
     new SonarKit((max(100, 300-10*getLevel())), this);
     
     new WaterPool(20, 60, (max(100, 300-10*getLevel())), this);
+    
+    new Protester(this);
      
     // END TESTING CODE
     
@@ -159,7 +161,7 @@ bool StudentWorld::isThereObstacle(int x, int y) const    // return true if ther
     return false;
 }
 
-bool StudentWorld::radiusCloseToBoulder(int x, int y, Actor* actor) const  // FrackMan must be less than 3.00 from center of boulder??
+bool StudentWorld::radiusCloseToBoulder(int x, int y, Actor* actor) const  // FrackMan must be less than 3.00 from boulder
 {
     for (int i = 0; i < m_allActors.size(); i++)
     {
@@ -193,7 +195,7 @@ void StudentWorld::boulderSmash(Boulder* smasher)
         {
             if (getRadiusBetween(m_allActors[i], smasher) <= 3.00)
             {
-                // how to call decreaseHealthPoints using a Actor class pointer??? HALP PLS
+                dynamic_cast<Person*>(m_allActors[i])->decreaseHealthPoints(100);
             }
         }
     }
@@ -232,9 +234,9 @@ void StudentWorld::pickedUpByFrackMan(Goodies* goodie, char label)
     m_FrackMan->addToInventory(goodie, label);
 }
 
-bool StudentWorld::closeToFrackMan(Actor* goodie, double howClose) const // returns true if FrackMan is close enough to make the goodie visible
+bool StudentWorld::closeToFrackMan(Actor* actor, double howClose) const // returns true if FrackMan is close enough to make the goodie visible
 {
-    return (getRadiusBetween(goodie, m_FrackMan) <= howClose);
+    return (getRadiusBetween(actor, m_FrackMan) <= howClose);
 }
 
 void StudentWorld::sonarFunction()
@@ -246,6 +248,11 @@ void StudentWorld::sonarFunction()
                 m_allActors[i]->makeVisible();
             }
     }
+}
+
+void StudentWorld::annoyFrackMan(int decreaseHP)
+{
+    m_FrackMan->getAnnoyed(decreaseHP);
 }
 
 double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const

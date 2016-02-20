@@ -38,9 +38,11 @@ public:
     
     void pickedUpByFrackMan(Goodies* goodie, char label);  // goodie can tell FrackMan it just received something
     
-    bool closeToFrackMan(Actor* goodie, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
+    bool closeToFrackMan(Actor* actor, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
     
     void sonarFunction();  // makes all game objects within a radius of 12 visible
+    
+    void annoyFrackMan(int decreaseHP);  // call the getAnnoyed() function in FrackMan
     
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
