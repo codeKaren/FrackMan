@@ -266,6 +266,24 @@ void StudentWorld::pickedUpByFrackMan(Goodies* goodie, char label)
     m_FrackMan->addToInventory(goodie, label);
 }
 
+bool StudentWorld::pickedUpByProtester(Nugget* nugget)
+{
+    for (int i = 0; i < m_allActors.size(); i++)
+    {
+        if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find protestors
+        {
+            if (getRadiusBetween(nugget, m_allActors[i]) < 3.00)
+            {
+                nugget->makeDead();   // nugget must make itself dead
+                dynamic_cast<Protester*>(m_allActors[i])->setLeaveOilField();  // protester is bribed, so leave the oil field
+                increaseScore(25);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool StudentWorld::closeToFrackMan(Actor* actor, double howClose) const // returns true if FrackMan is close enough to make the goodie visible
 {
     return (getRadiusBetween(actor, m_FrackMan) <= howClose);
@@ -307,7 +325,9 @@ bool StudentWorld::isFacingFrackMan(Protester* protester) const
 bool StudentWorld::isInLineOfSight(Protester* protester) const
 {
     if (m_FrackMan->getX() == protester->getX() || m_FrackMan->getY() == protester->getY())
+    {
         return true;
+    }
     return false;
 }
 
@@ -358,7 +378,7 @@ bool StudentWorld::canMoveToFrackMan(Protester* protester) // protester can cont
             {
                 for (int n = protester->getX(); n < m_FrackMan->getX(); n++)
                 {
-                    if (isThereDirt(k, n) || isThereObstacle(k, n))
+                    if (isThereDirt(n, k) || isThereObstacle(n, k))
                     {
                         return false;
                     }
@@ -374,13 +394,13 @@ bool StudentWorld::canMoveToFrackMan(Protester* protester) // protester can cont
             {
                 for (int n = m_FrackMan->getX(); n < protester->getX(); n++)
                 {
-                    if (isThereDirt(k, n) || isThereObstacle(k, n))
+                    if (isThereDirt(n, k) || isThereObstacle(n, k))
                     {
                         return false;
                     }
                 }
             }
-            protester->setDirection(Actor::left);  
+            protester->setDirection(Actor::left);
             return true;
         }
     }

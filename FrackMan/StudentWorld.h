@@ -40,6 +40,8 @@ public:
     
     void pickedUpByFrackMan(Goodies* goodie, char label);  // goodie can tell FrackMan it just received something
     
+    bool pickedUpByProtester(Nugget* nugget);  // check to see if nugget is picked up by the protester
+    
     bool closeToFrackMan(Actor* actor, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
     
     bool isFacingFrackMan(Protester* protester) const; // returns true if a protester is facing FrackMan

@@ -1,6 +1,7 @@
 #include "Actor.h"
 #include "StudentWorld.h"
 #include <iostream> // TESTING ONLY
+using namespace std;
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
@@ -364,6 +365,12 @@ void Nugget::doSomething()
     }
     // NUGGET MUST CHECK TO SEE IF IT IS PICKUPABLE BY PROTESTORS AND STUFF
     
+    if (m_pickupableByFrackMan == false && whereAmI()->pickedUpByProtester(this))  // protester picks up nugget dropped by FrackMan
+    {
+        whereAmI()->playSound(SOUND_PROTESTER_FOUND_GOLD);
+        return;
+    }
+    
     if (!m_permanentState)   // nugget is temporary (since it was dropped by FrackMan)
     {
         if (howManyTicksLeft() == 0)
@@ -654,10 +661,6 @@ void Protester::doSomething()
             // move one step closer to the exit (60, 60) by using a queue-based maze-searching algorithm
             // a single data structure that enables all protesters to determine their optimal path regardless of location???
             // have a 64 by 64 2D array that holds the direction that the protester should move in to get to the exit
-            
-            // GARBAGE (ONLY WORKS IF YOU KILL THE PROTESTER RIGHT AWAY)
-            setDirection(right);
-            tryToMove(right);
         }
     }
     
