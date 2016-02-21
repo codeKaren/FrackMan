@@ -62,7 +62,7 @@ int StudentWorld::init()
     new WaterPool(20, 60, (max(100, 300-10*getLevel())), this);
     
     new Protester(this);
-     
+    
     // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;

@@ -119,10 +119,7 @@ bool Actor::tryToMove(Direction direction)
         return true;
     }
     else
-    {
-        makeDead();
         return false;
-    }
 }
 
 bool Actor::canGetAnnoyed()
@@ -186,14 +183,8 @@ void Boulder::doSomething()
             if (numTicksWaiting == 30)
                 whereAmI()->playSound(SOUND_FALLING_ROCK);       // only plays the sound one time 
 
-            tryToMove(down);  // move downward
-            
-            // if there is boulder directly below, kill the current boulder
-            if (whereAmI()->isThereObstacle(getX(), getY()-1))
-            {
+            if (!tryToMove(down))  // move downward (and kill the boulder if it can't move down)
                 makeDead();
-                return;
-            }
             
             // boulder sees if it hits FrackMan or protesters
             whereAmI()->boulderSmash(this);
@@ -256,19 +247,23 @@ void Squirt::doSomething()
         switch (getDirection())    // for each direction
         {
             case left:
-                tryToMove(left);      // try to to move in that direction
+                if (!tryToMove(left)) // try to to move in that direction
+                    makeDead();
                 decreaseDistance();   // decrease the distance that the squirt can continue to travel for
                 break;
             case right:
-                tryToMove(right);
+                if (!tryToMove(right))
+                    makeDead();
                 decreaseDistance();
                 break;
             case down:
-                tryToMove(down);
+                if (!tryToMove(down))
+                    makeDead();
                 decreaseDistance();
                 break;
             case up:
-                tryToMove(up);
+                if (!tryToMove(up))
+                    makeDead();
                 decreaseDistance();
                 break;
             case none:
@@ -683,11 +678,22 @@ void Protester::doSomething()
         {
             // pick a random new direction (that is not blocked)
             Direction dir = whereAmI()->generateRandomDirection();
+            while (!canMove(dir))  // can't move in the randomly generated direction
+            {
+                dir = whereAmI()->generateRandomDirection();  // keep trying to find a diriction that protester can move in
+            }
+            setDirection(dir);
+            setNumSquaresToMoveInCurrDir(whereAmI()->generateRandomNumber(8, 60));
+        }
+        else
+        {
             
         }
+        tryToMove(getDirection());
+        
     }
     resetNumTicksLeft();
-    setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that FrackMan must wait to shout
+    setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that the protester must wait to shout
 }
 
 void Protester::getAnnoyed(int decreaseHP)
