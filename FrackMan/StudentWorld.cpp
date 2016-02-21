@@ -63,6 +63,8 @@ int StudentWorld::init()
     
     new Protester(this);
     
+    new HardcoreProtester(this);
+    
     // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;
@@ -221,9 +223,12 @@ void StudentWorld::waterGun(Squirt* squirt)
                     playSound(SOUND_PROTESTER_ANNOYED);
                     dynamic_cast<Protester*>(m_allActors[i])->setNumTicksLeft(max(50, 100-getLevel()*10));  // stun the protester
                 }
-                else                        // must have been fully annoyed
+                else  // must have been fully annoyed
                 {
-                    increaseScore(100);
+                    if (dynamic_cast<Protester*>(m_allActors[i])->isHardcore()) // hardcore protester got squirted to death
+                        increaseScore(250);
+                    else    // regular protester got squirted to death
+                        increaseScore(100);
                     playSound(SOUND_PROTESTER_GIVE_UP);
                     dynamic_cast<Protester*>(m_allActors[i])->setLeaveOilField();  // protester is put into leave-oil-field state
                     dynamic_cast<Protester*>(m_allActors[i])->setNumTicksLeft(0);  // so protester moves the very next tick
@@ -272,12 +277,22 @@ bool StudentWorld::pickedUpByProtester(Nugget* nugget)
     {
         if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find protestors
         {
-            if (getRadiusBetween(nugget, m_allActors[i]) < 3.00)
+            if (getRadiusBetween(nugget, m_allActors[i]) <= 3.00)  // protester is close enough to pick up the nugget
             {
-                nugget->makeDead();   // nugget must make itself dead
-                dynamic_cast<Protester*>(m_allActors[i])->setLeaveOilField();  // protester is bribed, so leave the oil field
-                increaseScore(25);
-                return true;
+                nugget->makeDead();   // nugget must make itself dead since it was picked up
+                
+                if (!dynamic_cast<Protester*>(m_allActors[i])->isHardcore()) // regular protester picked up the nugget
+                {
+                    dynamic_cast<Protester*>(m_allActors[i])->setLeaveOilField();  // protester is bribed, so leave the oil field
+                    increaseScore(25);
+                    return true;
+                }
+                else  // hardcore protester picked up the nugget
+                {
+                    increaseScore(50);
+                    dynamic_cast<Protester*>(m_allActors[i])->setNumTicksLeft(max(50, 100-getLevel()*10)); // staring at the nugget
+                    return true;
+                }
             }
         }
     }

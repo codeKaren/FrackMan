@@ -363,6 +363,7 @@ void Nugget::doSomething()
         whereAmI()->increaseScore(10);
         whereAmI()->pickedUpByFrackMan(this, 'n');
     }
+    
     // NUGGET MUST CHECK TO SEE IF IT IS PICKUPABLE BY PROTESTORS AND STUFF
     
     if (m_pickupableByFrackMan == false && whereAmI()->pickedUpByProtester(this))  // protester picks up nugget dropped by FrackMan
@@ -622,8 +623,8 @@ void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
 
 // PROTESTOR IMPLEMENTATION ===========================================================================================
 
-Protester::Protester(StudentWorld* world)
-: Person(IID_PROTESTER, 60, 60, left, 1.0, 0, 5, world)
+Protester::Protester(StudentWorld* world, int imageID, int HP)
+: Person(imageID, 60, 60, left, 1.0, 0, HP, world)
 {
     m_numSquaresToMoveInCurrentDirection = howManySquaresInCurrentDir();
     m_numTicksTotal = whereAmI()->max(0, 3-(whereAmI()->getLevel())/4);
@@ -637,6 +638,12 @@ Protester::Protester(StudentWorld* world)
 Protester::~Protester()
 {
     
+}
+
+bool Protester::doDifferentiatedStuff()
+{
+    // cout << "regular differentiated stuff" << endl;
+    return false;
 }
 
 void Protester::doSomething()
@@ -673,6 +680,11 @@ void Protester::doSomething()
             setNumTicksLeft(60);   // prevent protester from moving for a while after shouting   ??? WHAT NUMBER ???
             setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
             return;
+    }
+    
+    else if (doDifferentiatedStuff())  // doesn't evaluate for regular protesters, maybe evaluate for hardcore protesters
+    {
+        
     }
     
     else if (whereAmI()->isInLineOfSight(this) && !whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->canMoveToFrackMan(this))
@@ -777,7 +789,6 @@ void Protester::getAnnoyed(int decreaseHP)
 
 int Protester::howManySquaresInCurrentDir()
 {
-    // generate a random number where 8 <= n <= 60    GARBAGE RIGHT NOW
     return whereAmI()->generateRandomNumber(8, 60);
 }
 
@@ -841,10 +852,15 @@ void Protester::setNumTicksSinceTurned(int numTicksSinceTurned)
     m_numTicksSinceTurned = numTicksSinceTurned;
 }
 
+bool Protester::isHardcore() const
+{
+    return false;
+}
+
 // HARDCOREPROTESTOR IMPLEMENTATION ==================================================================================
 
 HardcoreProtester::HardcoreProtester(StudentWorld* world)
-: Protester(world)
+: Protester(world, IID_HARD_CORE_PROTESTER, 20)
 {
     
 }
@@ -854,10 +870,33 @@ HardcoreProtester::~HardcoreProtester()
     
 }
 
-void HardcoreProtester::doSomething()
+bool HardcoreProtester::doDifferentiatedStuff()
 {
-    if (!isStillAlive())
-        return;
+    // cout << "hardcore differentiated stuff" << endl;
+    
+    if (!whereAmI()->closeToFrackMan(this, 4.00))  // hardcore protester is more than 4.00 units away from FrackMan
+    {
+        int M = 16 + whereAmI()->getLevel()*2;
+        /*
+         If the Hardcore Protester is less than or equal to a total of M legal
+         horizontal or vertical moves away from the current location of the
+         FrackMan (as can be determined using the same basic queue-based mazesearching
+         algorithm described in Hardcore Protester item 3.b above), then
+         the Hardcore Protester will sense the FrackMan’s cell phone signal and
+         know where he is. This is true even if the Hardcore Protester has no direct
+         line of sight to the FrackMan, so long as he can be reached in M moves
+         without digging through Dirt or going through a Boulder. In such a
+         situation, the Hardcore Protester will:
+            i. Determine which horizontal/vertical direction to move in (as
+            dictated by its maze-searching algorithm) such that if it were to
+            make such a move it would be one square closer to the FrackMan.
+            ii. Change its current direction to face this new direction.
+            iii. Move one square in this direction such that after the move it is one
+            square closer to the FrackMan’s current location.
+            iv. Return immediately.
+         */
+    }
+    return false;
 }
 
 void HardcoreProtester::getAnnoyed(int decreaseHP)
@@ -865,3 +904,7 @@ void HardcoreProtester::getAnnoyed(int decreaseHP)
     
 }
 
+bool HardcoreProtester::isHardcore() const
+{
+    return true; 
+}

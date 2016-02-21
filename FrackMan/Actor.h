@@ -153,7 +153,7 @@ private:
 class Protester: public Person
 {
 public:
-    Protester(StudentWorld* world);
+    Protester(StudentWorld* world, int imageID = IID_PROTESTER, int HP = 5);
     virtual ~Protester();
     virtual void doSomething();
     virtual void getAnnoyed(int decreaseHP);
@@ -164,6 +164,7 @@ public:
     int getNumTicksSinceShout() const;  // return m_numTicksSinceShout
     int getNumSquaresInCurrDir() const;  // get m_numSquaresToMoveInCurrentDirection
     int getNumTicksSinceTurned() const;  // get m_numTicksSinceTurned
+    virtual bool isHardcore() const; // returns false for a regular protester
     // Mutator functions
     void timePasses(); // decrements m_numTicksLeft
     void setNumTicksLeft(int numTicksLeft);  // sets m_numTicksLeft to whatever you want it to be
@@ -180,6 +181,7 @@ private:
     int m_numTicksSinceTurned;
     bool m_leaveOilFieldState;
     int howManySquaresInCurrentDir();
+    virtual bool doDifferentiatedStuff();  // add one different behavior to doSomething for the hardcore protester
 };
 
 class HardcoreProtester: public Protester
@@ -187,11 +189,12 @@ class HardcoreProtester: public Protester
 public:
     HardcoreProtester(StudentWorld* world);
     virtual ~HardcoreProtester();
-    virtual void doSomething();
     virtual void getAnnoyed(int decreaseHP);
+    virtual bool isHardcore() const; // returns true for a hardcore protester
     
 private:
-    
+    virtual bool doDifferentiatedStuff();  // add a different behavior to the protester class's doSomething() function
+
 };
 
 #endif // ACTOR_H_
