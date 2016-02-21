@@ -622,7 +622,7 @@ Protester::Protester(StudentWorld* world)
     m_numTicksTotal = whereAmI()->max(0, 3-(whereAmI()->getLevel())/4);
     m_numTicksLeft = m_numTicksTotal;
     m_leaveOilFieldState = false;
-    m_numTicksSinceShout = 15;
+    m_numTicksSinceShout = 0;
     whereAmI()->addActor(this);
 }
 
@@ -653,16 +653,17 @@ void Protester::doSomething()
             // have a 64 by 64 2D array that holds the direction that the protester should move in to get to the exit
         }
     }
-    else if (whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->isFacingFrackMan(this))  // AND MUST BE FACING FRACKMAN
+    
+    else if (whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->isFacingFrackMan(this) && getNumTicksSinceShout() <= 0)
     {
-        if (getNumTicksSinceShout() == 0)  // hasn't shouted for 15 non-resting ticks
-        {
+            // close enough, is facing FrackMan, and hasn't shouted for 15 non-resting ticks
             whereAmI()->playSound(SOUND_PROTESTER_YELL);
             whereAmI()->annoyFrackMan(2);
             setNumTicksShout(15);  // reset the number of ticks for the Protester to wait
+            setNumTicksLeft(60);   // prevent protester from moving for a while after shouting   ???WHAT NUMBER???
             return;
-        }
     }
+    
     else if (whereAmI()->isInLineOfSight(this) && !whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->canMoveToFrackMan(this))
     {
         // canMoveToFrackMan() changes the protester direction to face FrackMan if it returns true
@@ -687,12 +688,14 @@ void Protester::doSomething()
         }
         else
         {
-            
+            // number 7
         }
-        tryToMove(getDirection());
-        
+        if (!tryToMove(getDirection()))  // if the protester can move, it will just move and not evaluate the rest
+        {                                // if the protester is blocked from moving in its current direction
+            setNumSquaresToMoveInCurrDir(0);
+        }
     }
-    resetNumTicksLeft();
+    setNumTicksLeft(getNumTicksTotal()-1);
     setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that the protester must wait to shout
 }
 
@@ -752,11 +755,10 @@ void Protester::setNumSquaresToMoveInCurrDir(int squares)
     m_numSquaresToMoveInCurrentDirection = squares;
 }
 
-void Protester::resetNumTicksLeft()
+void Protester::setNumTicksLeft(int numTicksLeft)
 {
-    m_numTicksLeft = m_numTicksTotal;
+    m_numTicksLeft = numTicksLeft;
 }
-
 // HARDCOREPROTESTOR IMPLEMENTATION ==================================================================================
 
 HardcoreProtester::HardcoreProtester(StudentWorld* world)

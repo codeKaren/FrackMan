@@ -165,7 +165,7 @@ public:
     int getNumSquaresInCurrDir() const;  // get m_numSquaresToMoveInCurrentDirection
     // Mutator functions
     void timePasses(); // decrements m_numTicksLeft
-    void resetNumTicksLeft();  // resets num ticks left to m_numTicksTotal
+    void setNumTicksLeft(int numTicksLeft);  // sets m_numTicksLeft to whatever you want it to be
     void setLeaveOilField(); // changes m_leaveOilFieldState to true
     void setNumTicksShout(int numTicksShout);  // change the value of m_numTicksSinceShout
     void setNumSquaresToMoveInCurrDir(int squares);  // change the value of m_numSquaresToMoveInCurrentDirection

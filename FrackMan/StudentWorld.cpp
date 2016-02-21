@@ -243,28 +243,28 @@ bool StudentWorld::closeToFrackMan(Actor* actor, double howClose) const // retur
 bool StudentWorld::isFacingFrackMan(Protester* protester) const
 {
     // check quadrant 1
-    if (m_FrackMan->getX() > protester->getX() && m_FrackMan->getY() > protester->getY())
+    if (m_FrackMan->getX() >= protester->getX() && m_FrackMan->getY() >= protester->getY())
     {
         if (protester->getDirection() == Actor::right || protester->getDirection() == Actor::up)
             return true;
         return false;
     }
     // check quadrant 2
-    if (m_FrackMan->getX() < protester->getX() && m_FrackMan->getY() > protester->getY())
+    if (m_FrackMan->getX() <= protester->getX() && m_FrackMan->getY() >= protester->getY())
     {
         if (protester->getDirection() == Actor::left || protester->getDirection() == Actor::up)
             return true;
         return false;
     }
     // check quadrant 3
-    if (m_FrackMan->getX() < protester->getX() && m_FrackMan->getY() < protester->getY())
+    if (m_FrackMan->getX() <= protester->getX() && m_FrackMan->getY() <= protester->getY())
     {
         if (protester->getDirection() == Actor::left || protester->getDirection() == Actor::down)
             return true;
         return false;
     }
     // check quadrant 4
-    if (m_FrackMan->getX() > protester->getX() && m_FrackMan->getY() < protester->getY())
+    if (m_FrackMan->getX() >= protester->getX() && m_FrackMan->getY() <= protester->getY())
     {
         if (protester->getDirection() == Actor::right || protester->getDirection() == Actor::down)
             return true;
