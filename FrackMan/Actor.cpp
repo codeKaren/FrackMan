@@ -386,7 +386,7 @@ void Nugget::doSomething()
 // SONAR KIT IMPLEMENTATION ======================================================================================
 
 SonarKit::SonarKit(int numTicks, StudentWorld* world)
-: Goodies(IID_SONAR, 0, 60, right, 1.0, 2, true, numTicks, world)  // GARBAGE TICK NUM
+: Goodies(IID_SONAR, 0, 60, right, 1.0, 2, true, numTicks, world)
 {
 
 }
@@ -418,7 +418,7 @@ void SonarKit::doSomething()
 // WATER POOL IMPLEMENTATION =====================================================================================
 
 WaterPool::WaterPool(int startX, int startY, int numTicks, StudentWorld* world)
-: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, numTicks, world)  // GARBAGE TICK NUM
+: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, numTicks, world)  
 {
 
 }
@@ -620,6 +620,22 @@ void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
     if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
         whereAmI()->playSound(SOUND_DIG);
 }
+
+int FrackMan::getNumSquirts() const
+{
+    return m_numSquirts;
+}
+
+int FrackMan::getNumSonars() const
+{
+    return m_numSonars;
+}
+
+int FrackMan::getNumNuggets() const
+{
+    return m_numNuggets;
+}
+
 
 // PROTESTOR IMPLEMENTATION ===========================================================================================
 

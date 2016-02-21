@@ -37,6 +37,12 @@ int StudentWorld::init()
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
+    int B = min(getLevel()/2 + 2, 6);  // number of boulders to be generated for each level
+    int G = max(5-getLevel()/2, 2);   // number of nuggets
+    int L = min(2+getLevel(), 20);  // number of barrels of oil 
+    
+    // generate boulders, nuggets, and oil barrels so that none are closer than 6 squares to each other
+    
     m_numBarrels = 2;   // to ensure that the game runs
     
     // BEGIN TESTING CODE
@@ -72,15 +78,20 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
+    
+    
     if (m_FrackMan->isStillAlive() == false)  // FRACK MAN IS DEAD NOOOOOOO
         return GWSTATUS_PLAYER_DIED;
     
-    if (m_numBarrels == 0)
+    if (m_numBarrels == 0)   // all of the barrels have been collected, so the level is done!
+    {
+        playSound(SOUND_FINISHED_LEVEL);
         return GWSTATUS_FINISHED_LEVEL;
+    }
     
-    m_FrackMan->doSomething();
+    m_FrackMan->doSomething();   // tell FrackMan to do something
     
-    for (int i = 0; i < m_allActors.size(); i++)
+    for (int i = 0; i < m_allActors.size(); i++)  // tell all of the other actors to do something (except dirt)
         m_allActors[i]->doSomething();
     
     for (vector<Actor*>::iterator it = m_allActors.begin(); it != m_allActors.end(); )
@@ -96,7 +107,7 @@ int StudentWorld::move()
     
     setGameStatText("FRACK YOU, FRACK MAN!");   // garbage right now
     
-    return GWSTATUS_CONTINUE_GAME;
+    return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
 
 void StudentWorld::cleanUp()
@@ -136,6 +147,19 @@ StudentWorld::~StudentWorld()    // FREE HIM (all dynamically allocated memory)
     }
     
     delete m_FrackMan;    // bye bye FrackMan
+}
+
+void StudentWorld::updateDisplayText() const   // update the display text at the top of the screen
+{
+    int score = getScore();
+    int level = getLevel();
+    int lives = getLives();
+    int health = m_FrackMan->getHealthPoints() * 10;
+    int squirts = m_FrackMan->getNumSquirts();
+    int nuggets = m_FrackMan->getNumNuggets();
+    int sonar = m_FrackMan->getNumSonars();
+    int barrelsLeft = m_numBarrels;
+
 }
 
 bool StudentWorld::isThereDirt(int x, int y) const  // GET DIRTY

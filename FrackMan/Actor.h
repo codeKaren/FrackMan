@@ -142,6 +142,10 @@ public:
     virtual void doSomething();
     virtual void getAnnoyed(int decreaseHP);
     void addToInventory(Goodies* goodie, char label);
+    // accessors
+    int getNumSquirts() const;  // return m_numSquirts
+    int getNumSonars() const;  // return m_numSonars
+    int getNumNuggets() const;  // return m_numNuggets
     
 private:
     int m_numSquirts;
