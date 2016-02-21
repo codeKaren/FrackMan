@@ -658,7 +658,7 @@ void Protester::doSomething()
             // have a 64 by 64 2D array that holds the direction that the protester should move in to get to the exit
         }
     }
-    else if (whereAmI()->closeToFrackMan(this, 4.00) && isFacingFrackMan())  // AND MUST BE FACING FRACKMAN
+    else if (whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->isFacingFrackMan(this))  // AND MUST BE FACING FRACKMAN
     {
         if (getNumTicksSinceShout() == 0)  // hasn't shouted for 15 non-resting ticks
         {
@@ -668,11 +668,26 @@ void Protester::doSomething()
             return;
         }
     }
-    else if (isInLineOfSight() && !whereAmI()->closeToFrackMan(this, 4.00) && canMoveToFrackMan())
+    else if (whereAmI()->isInLineOfSight(this) && !whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->canMoveToFrackMan(this))
     {
-        
+        // canMoveToFrackMan() changes the protester direction to face FrackMan if it returns true
+        tryToMove(getDirection());  // move forward one square
+        setNumSquaresToMoveInCurrDir(0);
+        return;
     }
-    shoutSoon();  // decrease the number of ticks that FrackMan must wait to shout
+    else   // can't directly see FrackMan
+    {
+        tryToMove(getDirection());
+        setNumSquaresToMoveInCurrDir(getNumSquaresInCurrDir()-1); // decrement the number of squares to move in the current direction
+        if (getNumSquaresInCurrDir() <= 0)
+        {
+            // pick a random new direction (that is not blocked)
+            Direction dir = whereAmI()->generateRandomDirection();
+            
+        }
+    }
+    resetNumTicksLeft();
+    setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that FrackMan must wait to shout
 }
 
 void Protester::getAnnoyed(int decreaseHP)
@@ -682,8 +697,8 @@ void Protester::getAnnoyed(int decreaseHP)
 
 int Protester::howManySquaresInCurrentDir()
 {
-    // generate a random number where 8 <= n <= 60
-    return 10;   // garbage right now
+    // generate a random number where 8 <= n <= 60    GARBAGE RIGHT NOW
+    return whereAmI()->generateRandomNumber(8, 60);
 }
 
 int Protester::getNumTicksTotal() const
@@ -711,34 +726,9 @@ void Protester::setLeaveOilField()
     m_leaveOilFieldState = true;
 }
 
-bool Protester::isFacingFrackMan() const // GARBAGE VALUES RIGHT NOW;   HOW TO IMPLEMENT THIS???
-{
-    return true;
-}
-
-bool Protester::isInLineOfSight() const // GARBAGE VALUES RIGHT NOW;   HOW TO IMPLEMENT???
-{
-    return true;
-}
-
-bool Protester::canMoveToFrackMan() // returns true unless Protester runs into dirt or something
-{
-    while (canMove(right))  // if you can still move forward;  GARBAGE RIGHT NOW
-    {
-        if (whereAmI()->closeToFrackMan(this, 4.00))  // reaches FrackMan
-            return true;
-    }
-    return false;
-}
-
 int Protester::getNumTicksSinceShout() const
 {
     return m_numTicksSinceShout;
-}
-
-void Protester::shoutSoon()
-{
-    m_numTicksSinceShout--;
 }
 
 void Protester::setNumTicksShout(int numTicksShout)
@@ -746,6 +736,20 @@ void Protester::setNumTicksShout(int numTicksShout)
     m_numTicksSinceShout = numTicksShout;
 }
 
+int Protester::getNumSquaresInCurrDir() const
+{
+    return m_numSquaresToMoveInCurrentDirection;
+}
+
+void Protester::setNumSquaresToMoveInCurrDir(int squares)
+{
+    m_numSquaresToMoveInCurrentDirection = squares;
+}
+
+void Protester::resetNumTicksLeft()
+{
+    m_numTicksLeft = m_numTicksTotal;
+}
 
 // HARDCOREPROTESTOR IMPLEMENTATION ==================================================================================
 

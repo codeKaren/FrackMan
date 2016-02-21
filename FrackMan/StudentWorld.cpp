@@ -2,6 +2,7 @@
 #include "Actor.h"
 #include <string>
 #include <iostream> // JUST FOR TESTING
+#include <math.h>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -239,6 +240,123 @@ bool StudentWorld::closeToFrackMan(Actor* actor, double howClose) const // retur
     return (getRadiusBetween(actor, m_FrackMan) <= howClose);
 }
 
+bool StudentWorld::isFacingFrackMan(Protester* protester) const
+{
+    // check quadrant 1
+    if (m_FrackMan->getX() > protester->getX() && m_FrackMan->getY() > protester->getY())
+    {
+        if (protester->getDirection() == Actor::right || protester->getDirection() == Actor::up)
+            return true;
+        return false;
+    }
+    // check quadrant 2
+    if (m_FrackMan->getX() < protester->getX() && m_FrackMan->getY() > protester->getY())
+    {
+        if (protester->getDirection() == Actor::left || protester->getDirection() == Actor::up)
+            return true;
+        return false;
+    }
+    // check quadrant 3
+    if (m_FrackMan->getX() < protester->getX() && m_FrackMan->getY() < protester->getY())
+    {
+        if (protester->getDirection() == Actor::left || protester->getDirection() == Actor::down)
+            return true;
+        return false;
+    }
+    // check quadrant 4
+    if (m_FrackMan->getX() > protester->getX() && m_FrackMan->getY() < protester->getY())
+    {
+        if (protester->getDirection() == Actor::right || protester->getDirection() == Actor::down)
+            return true;
+        return false;
+    }
+    return false;  // this line should never be evaluated unless there is an error in my code
+}
+
+bool StudentWorld::isInLineOfSight(Protester* protester) const
+{
+    if (m_FrackMan->getX() == protester->getX() || m_FrackMan->getY() == protester->getY())
+        return true;
+    return false;
+}
+
+bool StudentWorld::canMoveToFrackMan(Protester* protester) // protester can continue moving in the current direction to reach FrackMan; makes the protester face FrackMan if it returns true
+{
+    // moving up or down
+    if (protester->getX() == m_FrackMan->getX())
+    {
+        if (protester->getY() < m_FrackMan->getY())  // move up to get to FrackMan
+        {
+            for (int k = protester->getX(); k < protester->getX() + 4; k++)  // check the whole width of protester
+            {
+                for (int n = protester->getY(); n < m_FrackMan->getY(); n++)
+                {
+                    if (isThereDirt(k, n) || isThereObstacle(k, n))
+                    {
+                        return false;
+                    }
+                }
+            }
+            protester->setDirection(Actor::up);   // since the protester can move to Frackman, change its direction
+            return true;
+        }
+        
+        if (protester->getY() > m_FrackMan->getY())  // move down to get to FrackMan
+        {
+            for (int k = protester->getX(); k < protester->getX() + 4; k++)
+            {
+                for (int n = m_FrackMan->getY(); n < protester->getY(); n++)
+                {
+                    if (isThereDirt(k, n) || isThereObstacle(k, n))
+                    {
+                        return false;
+                    }
+                }
+            }
+            protester->setDirection(Actor::down);
+            return true;
+        }
+    }
+    
+    // moving left or right
+    if (protester->getY() == m_FrackMan->getY())
+    {
+        if (protester->getX() < m_FrackMan->getX())  // move right to get to FrackMan
+        {
+            for (int k = protester->getY(); k < protester->getY() + 4; k++)
+            {
+                for (int n = protester->getX(); n < m_FrackMan->getX(); n++)
+                {
+                    if (isThereDirt(k, n) || isThereObstacle(k, n))
+                    {
+                        return false;
+                    }
+                }
+            }
+            protester->setDirection(Actor::right);
+            return true;
+        }
+        
+        if (protester->getX() > m_FrackMan->getX())  // move left to get to FrackMan
+        {
+            for (int k = protester->getY(); k < protester->getY() + 4; k++)
+            {
+                for (int n = m_FrackMan->getX(); n < protester->getX(); n++)
+                {
+                    if (isThereDirt(k, n) || isThereObstacle(k, n))
+                    {
+                        return false;
+                    }
+                }
+            }
+            protester->setDirection(Actor::left);  
+            return true;
+        }
+    }
+    
+    return true;  // no dirt or obstacles in the path, so return true
+}
+
 void StudentWorld::sonarFunction()
 {
     for (int i = 0; i < m_allActors.size(); i++)
@@ -274,4 +392,30 @@ int StudentWorld::min(int a, int b)
     if (a < b)
         return a;
     return b;
+}
+
+int StudentWorld::generateRandomNumber(int startNum, int endNum)  
+{
+    return rand() % (endNum-startNum) + startNum;  // returns something within the range from startNum to endNum
+}
+
+Actor::Direction StudentWorld::generateRandomDirection()
+{
+    int dir = generateRandomNumber(0, 3);
+    switch (dir)
+    {
+        case 0:
+            return Actor::left;
+            break;
+        case 1:
+            return Actor::right;
+            break;
+        case 2:
+            return Actor::up;
+            break;
+        case 3:
+            return Actor::down;
+            break;
+    }
+    return Actor::none;   // this line of code should never get evaluated
 }

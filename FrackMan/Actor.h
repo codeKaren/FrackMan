@@ -21,7 +21,7 @@ public:
     StudentWorld* whereAmI() const;  // returns m_studentWorld
     bool canMove(Direction direction) const;  // returns true if the actor can move in the specified direction
     bool tryToMove(Direction direction);   // used inside doSomething()
-    virtual bool canGetAnnoyed();  // returns true if it is a Person class object 
+    virtual bool canGetAnnoyed();  // returns true if it is a Person class object
     
 private:
     bool m_stillAlive;
@@ -157,17 +157,18 @@ public:
     virtual ~Protester();
     virtual void doSomething();
     virtual void getAnnoyed(int decreaseHP);
+    // Accessor functions
     int getNumTicksTotal() const; // returns m_numTicksWaiting
     int getNumTicksLeft() const; // returns m_numTicksLeft
-    void timePasses(); // decrements m_numTicksLeft
     bool isLeaveOilFieldState() const; // returns m_leaveOilFieldState
-    void setLeaveOilField(); // changes m_leaveOilFieldState to true
-    bool isFacingFrackMan() const;  // return true if the protester is facing FrackMan
-    bool isInLineOfSight() const;  // returns true if the protester is in horizontal or vertical line of sight of FrackMan
-    bool canMoveToFrackMan();  // returns true if the protester can continue moving in the current direction to reach FrackMan
     int getNumTicksSinceShout() const;  // return m_numTicksSinceShout
-    void shoutSoon(); // decrements m_numTicksSinceShout
+    int getNumSquaresInCurrDir() const;  // get m_numSquaresToMoveInCurrentDirection
+    // Mutator functions
+    void timePasses(); // decrements m_numTicksLeft
+    void resetNumTicksLeft();  // resets num ticks left to m_numTicksTotal
+    void setLeaveOilField(); // changes m_leaveOilFieldState to true
     void setNumTicksShout(int numTicksShout);  // change the value of m_numTicksSinceShout
+    void setNumSquaresToMoveInCurrDir(int squares);  // change the value of m_numSquaresToMoveInCurrentDirection
     
 private:
     int m_numSquaresToMoveInCurrentDirection;

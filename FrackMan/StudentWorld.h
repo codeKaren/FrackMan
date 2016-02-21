@@ -40,15 +40,27 @@ public:
     
     bool closeToFrackMan(Actor* actor, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
     
+    bool isFacingFrackMan(Protester* protester) const; // returns true if a protester is facing FrackMan
+    
+    bool isInLineOfSight(Protester* protester) const; // returns true if a protester is in direct line of sight to FrackMan
+    
+    bool canMoveToFrackMan(Protester* protester);  // returns true if the protester can continue moving in the current direction to reach FrackMan; makes the protester face FrackMan if it returns true
+    
     void sonarFunction();  // makes all game objects within a radius of 12 visible
     
     void annoyFrackMan(int decreaseHP);  // call the getAnnoyed() function in FrackMan
+    
+    // MATH LIKE FUNCTIONS BELOW
     
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
     int max(int a, int b);  // returns the bigger number
     
-    int min(int a, int b);  // returns the smaller number 
+    int min(int a, int b);  // returns the smaller number
+    
+    int generateRandomNumber(int startNum, int endNum);  // returns a random number between startNum and endNum
+    
+    Actor::Direction generateRandomDirection();  // returns a random direction
     
 private:
     Dirt* m_dirt[64][64];
