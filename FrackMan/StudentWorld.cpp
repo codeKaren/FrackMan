@@ -194,9 +194,13 @@ void StudentWorld::boulderSmash(Boulder* smasher)
     {
         if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find protestors
         {
-            if (getRadiusBetween(m_allActors[i], smasher) <= 3.00)
+            if (getRadiusBetween(m_allActors[i], smasher) <= 3.00 && !dynamic_cast<Protester*>(m_allActors[i])->isLeaveOilFieldState())
             {
                 dynamic_cast<Person*>(m_allActors[i])->decreaseHealthPoints(100);
+                increaseScore(500);  // protester getting smashed by boulder increases player score by 500
+                playSound(SOUND_PROTESTER_GIVE_UP);
+                dynamic_cast<Protester*>(m_allActors[i])->setLeaveOilField();  // protester is put into leave-oil-field state
+                dynamic_cast<Protester*>(m_allActors[i])->setNumTicksLeft(0);  // so protester moves the very next tick
             }
         }
     }
@@ -208,10 +212,22 @@ void StudentWorld::waterGun(Squirt* squirt)
     {
         if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find a protestors
         {
-            if (getRadiusBetween(m_allActors[i], squirt) <= 3.00)
+            if (getRadiusBetween(m_allActors[i], squirt) <= 3.00 && !dynamic_cast<Protester*>(m_allActors[i])->isLeaveOilFieldState())
             {
-                dynamic_cast<Person*>(m_allActors[i])->decreaseHealthPoints(2);
+                dynamic_cast<Person*>(m_allActors[i])->decreaseHealthPoints(2);  // decrease HP of protester
                 squirt->makeDead();
+                if (dynamic_cast<Person*>(m_allActors[i])->getHealthPoints() > 0)  // not fully annoyed yet
+                {
+                    playSound(SOUND_PROTESTER_ANNOYED);
+                    dynamic_cast<Protester*>(m_allActors[i])->setNumTicksLeft(max(50, 100-getLevel()*10));  // stun the protester
+                }
+                else                        // must have been fully annoyed
+                {
+                    increaseScore(100);
+                    playSound(SOUND_PROTESTER_GIVE_UP);
+                    dynamic_cast<Protester*>(m_allActors[i])->setLeaveOilField();  // protester is put into leave-oil-field state
+                    dynamic_cast<Protester*>(m_allActors[i])->setNumTicksLeft(0);  // so protester moves the very next tick
+                }
             }
         }
     }
