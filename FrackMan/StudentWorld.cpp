@@ -192,11 +192,26 @@ void StudentWorld::boulderSmash(Boulder* smasher)
     
     for (int i = 0; i < m_allActors.size(); i++)
     {
-        if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find a protestor
+        if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find protestors
         {
             if (getRadiusBetween(m_allActors[i], smasher) <= 3.00)
             {
                 dynamic_cast<Person*>(m_allActors[i])->decreaseHealthPoints(100);
+            }
+        }
+    }
+}
+
+void StudentWorld::waterGun(Squirt* squirt)
+{
+    for (int i = 0; i < m_allActors.size(); i++)
+    {
+        if (m_allActors[i]->canGetAnnoyed() == true)  // loop through all actors to find a protestors
+        {
+            if (getRadiusBetween(m_allActors[i], squirt) <= 3.00)
+            {
+                dynamic_cast<Person*>(m_allActors[i])->decreaseHealthPoints(2);
+                squirt->makeDead();
             }
         }
     }

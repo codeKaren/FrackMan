@@ -122,7 +122,7 @@ bool Actor::tryToMove(Direction direction)
         return false;
 }
 
-bool Actor::canGetAnnoyed()
+bool Actor::canGetAnnoyed() const
 {
     return false;
 }
@@ -188,7 +188,6 @@ void Boulder::doSomething()
             
             // boulder sees if it hits FrackMan or protesters
             whereAmI()->boulderSmash(this);
-            
         }
             numTicksWaiting++;
     }
@@ -235,6 +234,7 @@ Squirt::~Squirt()
 void Squirt::doSomething()
 {
     // IMPLEMENT LATER: CAUSE 2 POINTS OF ANNOYANCE TO PROTESTORS
+    whereAmI()->waterGun(this);
     
     if (m_travelDistance == 0)   // travelled full distance
     {
@@ -623,6 +623,7 @@ Protester::Protester(StudentWorld* world)
     m_numTicksLeft = m_numTicksTotal;
     m_leaveOilFieldState = false;
     m_numTicksSinceShout = 0;
+    m_numTicksSinceTurned = 0;
     whereAmI()->addActor(this);
 }
 
@@ -633,8 +634,16 @@ Protester::~Protester()
 
 void Protester::doSomething()
 {
+    std::cout << getHealthPoints() << std::endl;
+    
     if (!isStillAlive())
         return;
+    
+    if (getHealthPoints() <= 0)   // protester is dead
+    {
+        makeDead();
+    }
+    
     if (getNumTicksLeft() > 0)
     {
         timePasses();
@@ -642,6 +651,7 @@ void Protester::doSomething()
     }
     
     // Protester is not resting during this tick so...
+    
     if (isLeaveOilFieldState()) // protester is in a leave-the-oil-field state
     {
         if (getX() == 60 && getY() == 60)
@@ -660,7 +670,8 @@ void Protester::doSomething()
             whereAmI()->playSound(SOUND_PROTESTER_YELL);
             whereAmI()->annoyFrackMan(2);
             setNumTicksShout(15);  // reset the number of ticks for the Protester to wait
-            setNumTicksLeft(60);   // prevent protester from moving for a while after shouting   ???WHAT NUMBER???
+            setNumTicksLeft(60);   // prevent protester from moving for a while after shouting   ??? WHAT NUMBER ???
+            setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
             return;
     }
     
@@ -669,33 +680,93 @@ void Protester::doSomething()
         // canMoveToFrackMan() changes the protester direction to face FrackMan if it returns true
         tryToMove(getDirection());  // move forward one square
         setNumSquaresToMoveInCurrDir(0);
+        setNumTicksLeft(getNumTicksTotal());  // protester already had a non-resting turn, so reset the numTicksLeft
+        setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that the protester must wait to shout
+        setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
         return;
     }
     else   // can't directly see FrackMan
     {
-        tryToMove(getDirection());
-        setNumSquaresToMoveInCurrDir(getNumSquaresInCurrDir()-1); // decrement the number of squares to move in the current direction
         if (getNumSquaresInCurrDir() <= 0)
         {
             // pick a random new direction (that is not blocked)
             Direction dir = whereAmI()->generateRandomDirection();
             while (!canMove(dir))  // can't move in the randomly generated direction
             {
-                dir = whereAmI()->generateRandomDirection();  // keep trying to find a diriction that protester can move in
+                dir = whereAmI()->generateRandomDirection();  // keep trying to find a direction that protester can move in
             }
             setDirection(dir);
             setNumSquaresToMoveInCurrDir(whereAmI()->generateRandomNumber(8, 60));
+            setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
         }
         else
         {
-            // number 7
+            // can move in perpendicular direction and hasn't that way for the past 200 non-resting ticks
+            if (getNumTicksSinceTurned() <= 0)
+            {
+                bool turned = false;  // remember if the protester turned or not
+                
+                if (getDirection() == right || getDirection() == left) // check if can move up or down
+                {
+                    if (canMove(up) && canMove(down))   // can move both up and down
+                    {
+                        int i = whereAmI()->generateRandomNumber(0, 1);
+                        if (i == 0)
+                            setDirection(up);
+                        else
+                            setDirection(down);
+                        turned = true;
+                    }
+                    if (canMove(up))              // can only move up
+                    {
+                        setDirection(up);
+                        turned = true;
+                    }
+                    if (canMove(down))            // can only move down
+                    {
+                        setDirection(down);
+                        turned = true;
+                    }
+                }
+                else   // direction is either up or down, so check if it can move left or right
+                {
+                    if (canMove(left) && canMove(left))   // can move both left and right
+                    {
+                        int i = whereAmI()->generateRandomNumber(0, 1);
+                        if (i == 0)
+                            setDirection(left);
+                        else
+                            setDirection(right);
+                        turned = true;
+                    }
+                    if (canMove(left))              // can only move left
+                    {
+                        setDirection(left);
+                        turned = true;
+                    }
+                    
+                    if (canMove(right))            // can only move right
+                    {
+                        setDirection(right);
+                        turned = true;
+                    }
+                }
+                if (turned == true)
+                {
+                    setNumSquaresToMoveInCurrDir(whereAmI()->generateRandomNumber(8, 60));
+                    setNumTicksSinceTurned(200);
+                }
+            }
         }
+        
         if (!tryToMove(getDirection()))  // if the protester can move, it will just move and not evaluate the rest
-        {                                // if the protester is blocked from moving in its current direction
-            setNumSquaresToMoveInCurrDir(0);
+        {
+            setNumSquaresToMoveInCurrDir(0);  // if the protester is blocked from moving in its current direction
         }
+        else
+            setNumSquaresToMoveInCurrDir(getNumSquaresInCurrDir()-1); // decrement the number of squares to move in the current direction
     }
-    setNumTicksLeft(getNumTicksTotal()-1);
+    setNumTicksLeft(getNumTicksTotal());  // protester already had a non-resting turn, so reset the numTicksLeft
     setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that the protester must wait to shout
 }
 
@@ -759,6 +830,17 @@ void Protester::setNumTicksLeft(int numTicksLeft)
 {
     m_numTicksLeft = numTicksLeft;
 }
+
+int Protester::getNumTicksSinceTurned() const
+{
+    return m_numTicksSinceTurned;
+}
+
+void Protester::setNumTicksSinceTurned(int numTicksSinceTurned)
+{
+    m_numTicksSinceTurned = numTicksSinceTurned;
+}
+
 // HARDCOREPROTESTOR IMPLEMENTATION ==================================================================================
 
 HardcoreProtester::HardcoreProtester(StudentWorld* world)

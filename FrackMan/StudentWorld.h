@@ -28,7 +28,9 @@ public:
     
     bool radiusCloseToBoulder(int x, int y, Actor* actor) const;  // returns true if FrackMan is going to dig into a boulder
     
-    void boulderSmash(Boulder* smasher);  // boulder hits FrackMan or protester 
+    void boulderSmash(Boulder* smasher);  // boulder hits FrackMan or protester
+    
+    void waterGun(Squirt* squirt);  // squirt hits protester
     
     bool deleteDirt(Actor* actor);   // deletes dirt in position currently occupied by an actor
     

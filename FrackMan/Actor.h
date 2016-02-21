@@ -21,7 +21,7 @@ public:
     StudentWorld* whereAmI() const;  // returns m_studentWorld
     bool canMove(Direction direction) const;  // returns true if the actor can move in the specified direction
     bool tryToMove(Direction direction);   // used inside doSomething()
-    virtual bool canGetAnnoyed();  // returns true if it is a Person class object
+    virtual bool canGetAnnoyed() const;  // returns true if it is a Person class object
     
 private:
     bool m_stillAlive;
@@ -163,19 +163,22 @@ public:
     bool isLeaveOilFieldState() const; // returns m_leaveOilFieldState
     int getNumTicksSinceShout() const;  // return m_numTicksSinceShout
     int getNumSquaresInCurrDir() const;  // get m_numSquaresToMoveInCurrentDirection
+    int getNumTicksSinceTurned() const;  // get m_numTicksSinceTurned
     // Mutator functions
     void timePasses(); // decrements m_numTicksLeft
     void setNumTicksLeft(int numTicksLeft);  // sets m_numTicksLeft to whatever you want it to be
     void setLeaveOilField(); // changes m_leaveOilFieldState to true
     void setNumTicksShout(int numTicksShout);  // change the value of m_numTicksSinceShout
     void setNumSquaresToMoveInCurrDir(int squares);  // change the value of m_numSquaresToMoveInCurrentDirection
+    void setNumTicksSinceTurned(int numTicksSinceTurned); // change the value of m_numTicksSinceTunred
     
 private:
     int m_numSquaresToMoveInCurrentDirection;
     int m_numTicksTotal;
     int m_numTicksLeft;
     int m_numTicksSinceShout;
-    int m_leaveOilFieldState;
+    int m_numTicksSinceTurned;
+    bool m_leaveOilFieldState;
     int howManySquaresInCurrentDir();
 };
 
