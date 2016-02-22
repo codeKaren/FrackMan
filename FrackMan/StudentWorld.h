@@ -22,7 +22,7 @@ public:
     
     ~StudentWorld(); // frees dynamically allocated memory (FrackMan and Dirt)
     
-    void updateDisplayText() const;  // updates the text at the top of the screen during each move() call
+    void updateDisplayText();  // updates the text at the top of the screen during each move() call
     
     bool isThereDirt(int x, int y) const;   // returns true if there is dirt in the specified spot on the screen
     

@@ -74,7 +74,7 @@ private:
     int m_numTicks;
 };
 
-class OilBarrel: public Goodies    // *** ALL DONE *** //
+class OilBarrel: public Goodies    
 {
 public:
     OilBarrel(int startX, int startY, StudentWorld* world);

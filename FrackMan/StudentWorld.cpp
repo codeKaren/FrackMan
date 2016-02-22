@@ -78,7 +78,8 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
-    
+    // update the game status line
+    updateDisplayText();
     
     if (m_FrackMan->isStillAlive() == false)  // FRACK MAN IS DEAD NOOOOOOO
         return GWSTATUS_PLAYER_DIED;
@@ -104,8 +105,6 @@ int StudentWorld::move()
         else
             it++;
     }
-    
-    setGameStatText("FRACK YOU, FRACK MAN!");   // garbage right now
     
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
@@ -149,17 +148,31 @@ StudentWorld::~StudentWorld()    // FREE HIM (all dynamically allocated memory)
     delete m_FrackMan;    // bye bye FrackMan
 }
 
-void StudentWorld::updateDisplayText() const   // update the display text at the top of the screen
+void StudentWorld::updateDisplayText()  // update the display text at the top of the screen
 {
-    int score = getScore();
-    int level = getLevel();
-    int lives = getLives();
-    int health = m_FrackMan->getHealthPoints() * 10;
-    int squirts = m_FrackMan->getNumSquirts();
-    int nuggets = m_FrackMan->getNumNuggets();
-    int sonar = m_FrackMan->getNumSonars();
-    int barrelsLeft = m_numBarrels;
-
+    string s = "00000000";   // default string that we can take 0s from using substr()
+    string t = "     ";   // default string that we can take spaces from using substr()
+    
+    string score = to_string(getScore());
+    string level = to_string(getLevel());
+    string lives = to_string(getLives());
+    string health = to_string(m_FrackMan->getHealthPoints() * 10);
+    string squirts = to_string(m_FrackMan->getNumSquirts());
+    string nuggets = to_string(m_FrackMan->getNumNuggets());
+    string sonar = to_string(m_FrackMan->getNumSonars());
+    string barrelsLeft = to_string(m_numBarrels);
+    
+    score = s.substr(0, 6-score.size()) + score;
+    level = t.substr(0, 2-level.size()) + level;
+    health = t.substr(0, 3-health.size()) + health + "%";
+    squirts = t.substr(0, 2-squirts.size()) + squirts;
+    nuggets = t.substr(0, 2-nuggets.size()) + nuggets;
+    sonar = t.substr(0, 2-sonar.size()) + sonar;
+    barrelsLeft = t.substr(0, 2-barrelsLeft.size()) + barrelsLeft;
+    
+    string final = "Scr: " + score + "  " + "Lvl: " + level + "  " + "Lives: " + lives + "  " + "Hlth: " + health + "  " + "Wtr: " + squirts + "  " + "Gld: " + nuggets + "  " + "Sonar: " + sonar + "  " + "Oil Left: " + barrelsLeft;
+    
+    setGameStatText(final);
 }
 
 bool StudentWorld::isThereDirt(int x, int y) const  // GET DIRTY

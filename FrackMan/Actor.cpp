@@ -174,6 +174,7 @@ void Boulder::doSomething()
         if (numMissingDirt == 4)          // no dirt at all under the boulder
         {
             m_stableState = false;
+            return;
         }
     }
     
@@ -234,6 +235,9 @@ Squirt::~Squirt()
 
 void Squirt::doSomething()
 {
+    if (!isStillAlive())
+        return;
+    
     // IMPLEMENT LATER: CAUSE 2 POINTS OF ANNOYANCE TO PROTESTORS
     whereAmI()->waterGun(this);
     
