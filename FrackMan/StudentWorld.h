@@ -9,6 +9,17 @@
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
+class Coord    // use in the maze searching algorithm
+{
+public:
+    Coord(int rr, int cc) : m_r(rr), m_c(cc) {}
+    int r() const { return m_r; }
+    int c() const { return m_c; }
+private:
+    int m_r;
+    int m_c;
+};
+
 class StudentWorld : public GameWorld
 {
 public:
@@ -68,6 +79,11 @@ public:
     
     Actor::Direction generateRandomDirection();  // returns a random direction
     
+    Actor::Direction whichDirectionToGoIn(Protester* protester);  // returns the direction that the protester should go in to reach the exit
+    
+    void updateMaze();  // updates the array for the protesters to use to find what direction they should move in 
+    
+    
 private:
     Dirt* m_dirt[64][64];
     FrackMan* m_FrackMan;
@@ -79,6 +95,13 @@ private:
     double Pythagoras(int x1, int y1, int x2, int y2) const;  // finds the Euclidean distance between two points
     
     void getNewPosition(int xBound1, int yBound1, int xBound2, int yBound2, int& newX, int& newY);  // get a position for a new object to be generated based on existing x and y boundaries and place the position in (newX, newY)
+    
+    bool isValidWaterPoolSpot(int x, int y) const;   // returns true if it is a valid spot for the WaterPool to spawn
+    
+    bool mazeHasBoulder(int x, int y) const;  // returns true if there is a boulder in a 3.00 radius from (x,y)
+    
+    // maze searching array
+    Actor::Direction m_maze[64][64];
 };
 
 #endif // STUDENTWORLD_H_

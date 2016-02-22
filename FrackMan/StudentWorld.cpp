@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream> // JUST FOR TESTING
 #include <math.h>
+#include <queue>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -203,30 +204,17 @@ int StudentWorld::move()
         }
         else   // get a WaterPool
         {
-            // find a 4x4 spot with no dirt to add the WaterPool
-            bool stillSearching = true;
-            int dirtySquares = 0;  // number of squares with dirt
-            int x = 0;  // temp value
+            int x = 0;  // temp values
             int y = 0;
-            while (stillSearching)
-            {
+            do {
                 x = generateRandomNumber(0, 60);
                 y = generateRandomNumber(0, 60);
-                for (int i = x; i < x + 4; i++)
-                {
-                    for (int j = y; j < y + 4; j++)
-                    {
-                        if (isThereDirt(i, j))
-                            dirtySquares++;
-                    }
-                }
-                if (dirtySquares == 0)   // found a spot without dirt
-                    stillSearching = false;
-            }
-            new WaterPool(x, y, (max(100, 300-10*getLevel())), this);
+            } while (!isValidWaterPoolSpot(x, y));
+            new WaterPool(x, y, (max(100, 300-10*getLevel())), this);  // found valid spot so generate a WaterPool
         }
     }
     
+    upDateMaze();
     
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
@@ -679,3 +667,93 @@ void StudentWorld::getNewPosition(int xBound1, int yBound1, int xBound2, int yBo
     newX = x;
     newY = y;
 }
+
+bool StudentWorld::isValidWaterPoolSpot(int x, int y) const
+{
+    for (int i = x; i < x + 4; i++)
+    {
+        for (int j = y; j < y + 4; j++)
+        {
+            if (isThereDirt(i, j))
+                return false;
+        }
+    }
+    return true;   // no dirt so can spawn WaterPool there
+}
+
+Actor::Direction StudentWorld::whichDirectionToGoIn(Protester* protester) // returns the direction that the protester should go in to reach the exit
+{
+    int x = protester->getX();
+    int y = protester->getY();
+    return m_maze[x][y];
+}
+
+void StudentWorld::updateMaze()  // updates the array for the protesters to use to find what direction they should move in
+{
+    queue<Coord> coordQueue;    // create an empty queue
+    char maze[64][64];   // create an array of chars to hold a model of how the algorithm has travelled through the maze
+    for (int x = 0; x < 60; x++)   // actors can only travel between x = 0 and x = 60 and y = 0 and y = 60 throughout the game
+    {
+        for (int y = 0; y < 60; y++)
+        {
+            if (isThereDirt(x, y) || mazeHasBoulder(x, y))   // protester cannot move that way since blocked
+                maze[x][y] = '#';
+            else
+                maze[x][y] = '.';
+        }
+    }
+    
+    Coord start(60, 60);
+    
+    coordQueue.push(start);
+    maze[60][60] = '#';
+    m_maze[60][60] = Actor::none;   // already reached the end so don't need to add a direction
+    
+    while (!coordQueue.empty())
+    {
+        Coord current = coordQueue.front();    // get the value of the top item before popping
+        coordQueue.pop();
+        
+        if (maze[current.r()-1][current.c()] == '.')   // can move LEFT
+        {
+            coordQueue.push(Coord(current.r()-1, current.c()));
+            maze[current.r()-1][current.c()] = '#';
+            m_maze[current.r()-1][current.c()] = Actor::right;
+        }
+        
+        if (maze[current.r()][current.c()+1] == '.')   // can move NORTH
+        {
+            coordQueue.push(Coord(current.r(), current.c()+1));
+            maze[current.r()][current.c()+1] = '#';
+            m_maze[current.r()][current.c()+1] = Actor::down;
+        }
+        
+        if (maze[current.r()+1][current.c()] == '.')   // can move RIGHT
+        {
+            coordQueue.push(Coord(current.r()+1, current.c()));
+            maze[current.r()+1][current.c()] = '#';
+            m_maze[current.r()+1][current.c()] = Actor::left;
+        }
+        
+        if (maze[current.r()][current.c()-1] == '.')   // can move SOUTH
+        {
+            coordQueue.push(Coord(current.r(), current.c()-1));
+            maze[current.r()][current.c()-1] = '#';
+            m_maze[current.r()][current.c()-1] = Actor::up;
+        }
+    }
+}
+
+bool StudentWorld::mazeHasBoulder(int x, int y) const  // returns true if boulder in a 3.00 radius to (x,y)
+{
+    for (int i = 0; i < m_allActors.size(); i++)
+    {
+        if (m_allActors[i]->isObstacle() == true)   // loop through all actors to find an obstacle (boulder)
+        {
+            if (Pythagoras(x, y, m_allActors[i]->getX(), m_allActors[i]->getY()))  // there is a boulder nearby
+                return true;
+        }
+    }
+    return false;
+}
+
