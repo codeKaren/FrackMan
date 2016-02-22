@@ -462,11 +462,6 @@ Person::Person(int imageID, int startX, int startY, Direction startDirection, fl
 Person::~Person()
 { }
 
-bool Person::canGetAnnoyed() const
-{
-    return true;
-}
-
 void Person::decreaseHealthPoints(int howMany)
 {
     m_healthPoints -= howMany;
@@ -476,6 +471,11 @@ void Person::decreaseHealthPoints(int howMany)
 int Person::getHealthPoints() const
 {
     return m_healthPoints;
+}
+
+bool Person::canGetAnnoyed() const
+{
+    return true;
 }
 
 // FRACKMAN IMPLEMENTATION =======================================================================================
@@ -581,11 +581,6 @@ void FrackMan::doSomething()
                 
         }
     }
-}
-
-void FrackMan::getAnnoyed(int decreaseHP)
-{
-    decreaseHealthPoints(decreaseHP);   // decrease health points by a specified amount
 }
 
 void FrackMan::addToInventory(Goodies *goodie, char label)
@@ -804,11 +799,6 @@ void Protester::doSomething()
     setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that the protester must wait to shout
 }
 
-void Protester::getAnnoyed(int decreaseHP)
-{
-    
-}
-
 int Protester::howManySquaresInCurrentDir()
 {
     return whereAmI()->generateRandomNumber(8, 60);
@@ -921,10 +911,6 @@ bool HardcoreProtester::doDifferentiatedStuff()
     return false;
 }
 
-void HardcoreProtester::getAnnoyed(int decreaseHP)
-{
-    
-}
 
 bool HardcoreProtester::isHardcore() const
 {

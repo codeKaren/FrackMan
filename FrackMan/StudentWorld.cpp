@@ -134,13 +134,13 @@ int StudentWorld::init()
     */
     // END TESTING CODE
     
-    // inialize the maze direction array so it doesn't contain garbage values
+    // inialize the maze direction array so it doesn't contain garbage values; CAUSES GAME TO NOT START????
     
-    for (int i = 0; i < 64; i++)
-    {
-        for (int j = 0; j < 64; j++)
-            m_maze[i][j] = Actor::none;
-    }
+//    for (int i = 0; i < 64; i++)
+//    {
+//        for (int j = 0; j < 64; j++)
+//            m_maze[i][j] = Actor::none;
+//    }
     
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -492,6 +492,12 @@ bool StudentWorld::isFacingFrackMan(Protester* protester) const
     return false;  // this line should never be evaluated unless there is an error in my code
 }
 
+void StudentWorld::annoyFrackMan(int decreaseHP)
+{
+    m_FrackMan->decreaseHealthPoints(decreaseHP);
+}
+
+
 bool StudentWorld::isInLineOfSight(Protester* protester) const
 {
     if (m_FrackMan->getX() == protester->getX() || m_FrackMan->getY() == protester->getY())
@@ -587,11 +593,6 @@ void StudentWorld::sonarFunction()
                 m_allActors[i]->makeVisible();
             }
     }
-}
-
-void StudentWorld::annoyFrackMan(int decreaseHP)
-{
-    m_FrackMan->getAnnoyed(decreaseHP);
 }
 
 double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const
@@ -724,18 +725,18 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         Coord current = coordQueue.front();    // get the value of the top item before popping
         coordQueue.pop();
         
-        if (maze[current.r()-1][current.c()] == '.' && maze[current.r()-1][current.c()+1] == '.' && maze[current.r()-1][current.c()+2] == '.' && maze[current.r()-1][current.c()+3] == '.')   // can move LEFT
-        {
-            coordQueue.push(Coord(current.r()-1, current.c()));
-            maze[current.r()-1][current.c()] = '#';
-            m_maze[current.r()-1][current.c()] = Actor::right;
-        }
-        
         if (maze[current.r()][current.c()+1] == '.' && maze[current.r()+1][current.c()+1] == '.' && maze[current.r()+2][current.c()+1] == '.' && maze[current.r()+3][current.c()+1] == '.')   // can move NORTH
         {
             coordQueue.push(Coord(current.r(), current.c()+1));
             maze[current.r()][current.c()+1] = '#';
             m_maze[current.r()][current.c()+1] = Actor::down;
+        }
+        
+        if (maze[current.r()][current.c()-1] == '.' && maze[current.r()+1][current.c()-1] == '.' && maze[current.r()+2][current.c()-1] == '.' && maze[current.r()+3][current.c()-1] == '.')   // can move SOUTH
+        {
+            coordQueue.push(Coord(current.r(), current.c()-1));
+            maze[current.r()][current.c()-1] = '#';
+            m_maze[current.r()][current.c()-1] = Actor::up;
         }
         
         if (maze[current.r()+1][current.c()] == '.' && maze[current.r()+1][current.c()+1] == '.' && maze[current.r()+1][current.c()+2] == '.' && maze[current.r()+1][current.c()+3] == '.')   // can move RIGHT
@@ -745,11 +746,11 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
             m_maze[current.r()+1][current.c()] = Actor::left;
         }
         
-        if (maze[current.r()][current.c()-1] == '.' && maze[current.r()+1][current.c()-1] == '.' && maze[current.r()+2][current.c()-1] == '.' && maze[current.r()+3][current.c()-1] == '.')   // can move SOUTH
+        if (maze[current.r()-1][current.c()] == '.' && maze[current.r()-1][current.c()+1] == '.' && maze[current.r()-1][current.c()+2] == '.' && maze[current.r()-1][current.c()+3] == '.')   // can move LEFT
         {
-            coordQueue.push(Coord(current.r(), current.c()-1));
-            maze[current.r()][current.c()-1] = '#';
-            m_maze[current.r()][current.c()-1] = Actor::up;
+            coordQueue.push(Coord(current.r()-1, current.c()));
+            maze[current.r()-1][current.c()] = '#';
+            m_maze[current.r()-1][current.c()] = Actor::right;
         }
     }
 }

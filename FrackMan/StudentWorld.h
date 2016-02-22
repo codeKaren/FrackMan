@@ -57,6 +57,8 @@ public:
     
     bool closeToFrackMan(Actor* actor, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
     
+    void annoyFrackMan(int decreaseHP);  // annoy FrackMan 
+    
     bool isFacingFrackMan(Protester* protester) const; // returns true if a protester is facing FrackMan
     
     bool isInLineOfSight(Protester* protester) const; // returns true if a protester is in direct line of sight to FrackMan
@@ -64,8 +66,6 @@ public:
     bool canMoveToFrackMan(Protester* protester);  // returns true if the protester can continue moving in the current direction to reach FrackMan; makes the protester face FrackMan if it returns true
     
     void sonarFunction();  // makes all game objects within a radius of 12 visible
-    
-    void annoyFrackMan(int decreaseHP);  // call the getAnnoyed() function in FrackMan
     
     // MATH LIKE FUNCTIONS BELOW
     

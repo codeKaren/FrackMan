@@ -126,7 +126,6 @@ public:
     Person(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth, int HP, StudentWorld* world);
     virtual ~Person();
     virtual bool canGetAnnoyed() const; // returns true for objects derived from this class
-    virtual void getAnnoyed(int decreaseHP) = 0;
     void decreaseHealthPoints(int howMany);  // decreases m_healthPoints by the number specified in the parameter
     int getHealthPoints() const;  // returns m_healthPoints
     
@@ -140,7 +139,6 @@ public:
     FrackMan(StudentWorld* world);
     virtual ~FrackMan();
     virtual void doSomething();
-    virtual void getAnnoyed(int decreaseHP);
     void addToInventory(Goodies* goodie, char label);
     // accessors
     int getNumSquirts() const;  // return m_numSquirts
@@ -160,7 +158,6 @@ public:
     Protester(StudentWorld* world, int imageID = IID_PROTESTER, int HP = 5);
     virtual ~Protester();
     virtual void doSomething();
-    virtual void getAnnoyed(int decreaseHP);
     // Accessor functions
     int getNumTicksTotal() const; // returns m_numTicksWaiting
     int getNumTicksLeft() const; // returns m_numTicksLeft
@@ -193,7 +190,6 @@ class HardcoreProtester: public Protester
 public:
     HardcoreProtester(StudentWorld* world);
     virtual ~HardcoreProtester();
-    virtual void getAnnoyed(int decreaseHP);
     virtual bool isHardcore() const; // returns true for a hardcore protester
     
 private:
