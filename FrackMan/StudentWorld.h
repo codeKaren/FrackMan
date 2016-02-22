@@ -92,6 +92,9 @@ private:
     int m_numTicksSinceAddedProtester;
     int m_numProtesters;
     
+    // maze searching array
+    Actor::Direction m_maze[64][64];
+    
     double Pythagoras(int x1, int y1, int x2, int y2) const;  // finds the Euclidean distance between two points
     
     void getNewPosition(int xBound1, int yBound1, int xBound2, int yBound2, int& newX, int& newY);  // get a position for a new object to be generated based on existing x and y boundaries and place the position in (newX, newY)
@@ -99,9 +102,6 @@ private:
     bool isValidWaterPoolSpot(int x, int y) const;   // returns true if it is a valid spot for the WaterPool to spawn
     
     bool mazeHasBoulder(int x, int y) const;  // returns true if there is a boulder in a 3.00 radius from (x,y)
-    
-    // maze searching array
-    Actor::Direction m_maze[64][64];
 };
 
 #endif // STUDENTWORLD_H_

@@ -134,6 +134,14 @@ int StudentWorld::init()
     */
     // END TESTING CODE
     
+    // inialize the maze direction array so it doesn't contain garbage values
+    
+    for (int i = 0; i < 64; i++)
+    {
+        for (int j = 0; j < 64; j++)
+            m_maze[i][j] = Actor::none;
+    }
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -214,7 +222,7 @@ int StudentWorld::move()
         }
     }
     
-    upDateMaze();
+    updateMaze();
     
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
@@ -692,14 +700,16 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
 {
     queue<Coord> coordQueue;    // create an empty queue
     char maze[64][64];   // create an array of chars to hold a model of how the algorithm has travelled through the maze
-    for (int x = 0; x < 60; x++)   // actors can only travel between x = 0 and x = 60 and y = 0 and y = 60 throughout the game
+    for (int x = 0; x < 64; x++)   // actors can only travel between x = 0 and x = 60 and y = 0 and y = 60 throughout the game
     {
-        for (int y = 0; y < 60; y++)
+        for (int y = 0; y < 64; y++)
         {
             if (isThereDirt(x, y) || mazeHasBoulder(x, y))   // protester cannot move that way since blocked
                 maze[x][y] = '#';
             else
+            {
                 maze[x][y] = '.';
+            }
         }
     }
     
@@ -714,28 +724,28 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         Coord current = coordQueue.front();    // get the value of the top item before popping
         coordQueue.pop();
         
-        if (maze[current.r()-1][current.c()] == '.')   // can move LEFT
+        if (maze[current.r()-1][current.c()] == '.' && maze[current.r()-1][current.c()+1] == '.' && maze[current.r()-1][current.c()+2] == '.' && maze[current.r()-1][current.c()+3] == '.')   // can move LEFT
         {
             coordQueue.push(Coord(current.r()-1, current.c()));
             maze[current.r()-1][current.c()] = '#';
             m_maze[current.r()-1][current.c()] = Actor::right;
         }
         
-        if (maze[current.r()][current.c()+1] == '.')   // can move NORTH
+        if (maze[current.r()][current.c()+1] == '.' && maze[current.r()+1][current.c()+1] == '.' && maze[current.r()+2][current.c()+1] == '.' && maze[current.r()+3][current.c()+1] == '.')   // can move NORTH
         {
             coordQueue.push(Coord(current.r(), current.c()+1));
             maze[current.r()][current.c()+1] = '#';
             m_maze[current.r()][current.c()+1] = Actor::down;
         }
         
-        if (maze[current.r()+1][current.c()] == '.')   // can move RIGHT
+        if (maze[current.r()+1][current.c()] == '.' && maze[current.r()+1][current.c()+1] == '.' && maze[current.r()+1][current.c()+2] == '.' && maze[current.r()+1][current.c()+3] == '.')   // can move RIGHT
         {
             coordQueue.push(Coord(current.r()+1, current.c()));
             maze[current.r()+1][current.c()] = '#';
             m_maze[current.r()+1][current.c()] = Actor::left;
         }
         
-        if (maze[current.r()][current.c()-1] == '.')   // can move SOUTH
+        if (maze[current.r()][current.c()-1] == '.' && maze[current.r()+1][current.c()-1] == '.' && maze[current.r()+2][current.c()-1] == '.' && maze[current.r()+3][current.c()-1] == '.')   // can move SOUTH
         {
             coordQueue.push(Coord(current.r(), current.c()-1));
             maze[current.r()][current.c()-1] = '#';
@@ -750,10 +760,9 @@ bool StudentWorld::mazeHasBoulder(int x, int y) const  // returns true if boulde
     {
         if (m_allActors[i]->isObstacle() == true)   // loop through all actors to find an obstacle (boulder)
         {
-            if (Pythagoras(x, y, m_allActors[i]->getX(), m_allActors[i]->getY()))  // there is a boulder nearby
+            if (Pythagoras(x, y, m_allActors[i]->getX(), m_allActors[i]->getY()) <= 3.00)  // there is a boulder nearby
                 return true;
         }
     }
     return false;
 }
-

@@ -688,6 +688,7 @@ void Protester::doSomething()
             // move one step closer to the exit (60, 60) by using a queue-based maze-searching algorithm
             // a single data structure that enables all protesters to determine their optimal path regardless of location???
             // have a 64 by 64 2D array that holds the direction that the protester should move in to get to the exit
+            setDirection(whereAmI()->whichDirectionToGoIn(this));
             tryToMove(whereAmI()->whichDirectionToGoIn(this));
         }
     }
