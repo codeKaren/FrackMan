@@ -168,14 +168,15 @@ int StudentWorld::move()
     
     // possible add new actors during the tick
     
+    // ADDING PROTESTERS
     int T = max(25, 200-getLevel());   // how many ticks to wait until allowed to add another protester
     int P = min(15, 2 + getLevel()*1.5);  // target number of protesters in the field
     int probabilityOfHardcore = min(90, getLevel()*10 + 30);  // probability of generating a hardcore protester
-    
+
     if (m_numProtesters < P && m_numTicksSinceAddedProtester >= T)
     {
-        int random = generateRandomNumber(0, probabilityOfHardcore);
-        if (random == 0)   // generate a hardcore protester since it fulfilled the probability
+        int random = generateRandomNumber(1, probabilityOfHardcore);
+        if (random == 1)   // generate a hardcore protester since it fulfilled the probability
         {
             new HardcoreProtester(this);
         }
@@ -188,6 +189,44 @@ int StudentWorld::move()
         m_numProtesters++;
     }
     m_numTicksSinceAddedProtester++;
+    
+    // ADDING WATERPOOL OR SONARKIT
+    int G = getLevel()*25 + 300;  // 1 in G chance of adding new WaterPool or SonarKit during a tick
+    int gimmeGoods = generateRandomNumber(1, G);  // check if a WaterPool or SonarKit should be generated
+    if (gimmeGoods == 1)  // new goodie should be added
+    {
+        // 1 in 5 chance of adding SonarKit, 4 in 5 chance of adding WaterPool
+        int gimmeSonar = generateRandomNumber(1,5);
+        if (gimmeSonar == 1)   // get a SonarKit
+        {
+            new SonarKit((max(100, 300-10*getLevel())), this);
+        }
+        else   // get a WaterPool
+        {
+            // find a 4x4 spot with no dirt to add the WaterPool
+            bool stillSearching = true;
+            int dirtySquares = 0;  // number of squares with dirt
+            int x = 0;  // temp value
+            int y = 0;
+            while (stillSearching)
+            {
+                x = generateRandomNumber(0, 60);
+                y = generateRandomNumber(0, 60);
+                for (int i = x; i < x + 4; i++)
+                {
+                    for (int j = y; j < y + 4; j++)
+                    {
+                        if (isThereDirt(i, j))
+                            dirtySquares++;
+                    }
+                }
+                if (dirtySquares == 0)   // found a spot without dirt
+                    stillSearching = false;
+            }
+            new WaterPool(x, y, (max(100, 300-10*getLevel())), this);
+        }
+    }
+    
     
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
@@ -615,29 +654,6 @@ void StudentWorld::getNewPosition(int xBound1, int yBound1, int xBound2, int yBo
 {
     int x = generateRandomNumber(xBound1, xBound2);
     int y = generateRandomNumber(yBound1, yBound2);
-    
-//    // making the first object, so don't need to check if it's close, but need to check if being generated into the mineshaft
-//    
-//    int numSquaresNoDirt = 0;            // check so that the boulder doesn't get generated in the mineshaft
-//    bool inMineShaft = true;
-//    while (inMineShaft)
-//    {
-//        for (int i = x; i < x + 4; i++)
-//        {
-//            for (int j = y; j < y + 4; j++)
-//            {
-//                if (!isThereDirt(i, j))
-//                    numSquaresNoDirt++;
-//            }
-//        }
-//        if (numSquaresNoDirt == 0)
-//            inMineShaft = false;
-//        else
-//        {
-//            x = generateRandomNumber(xBound1, xBound2);
-//            y = generateRandomNumber(yBound1, yBound2);
-//        }
-//    }
     
     for (int j = 0; j < m_allActors.size(); j++)
     {
