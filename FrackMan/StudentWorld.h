@@ -73,6 +73,12 @@ private:
     FrackMan* m_FrackMan;
     std::vector<Actor*> m_allActors;
     int m_numBarrels;
+    int m_numTicksSinceAddedProtester;
+    int m_numProtesters;
+    
+    double Pythagoras(int x1, int y1, int x2, int y2) const;  // finds the Euclidean distance between two points
+    
+    void getNewPosition(int xBound1, int yBound1, int xBound2, int yBound2, int& newX, int& newY);  // get a position for a new object to be generated based on existing x and y boundaries and place the position in (newX, newY)
 };
 
 #endif // STUDENTWORLD_H_

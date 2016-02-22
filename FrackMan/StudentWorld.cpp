@@ -37,16 +37,76 @@ int StudentWorld::init()
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
-    int B = min(getLevel()/2 + 2, 6);  // number of boulders to be generated for each level
-    int G = max(5-getLevel()/2, 2);   // number of nuggets
-    int L = min(2+getLevel(), 20);  // number of barrels of oil 
-    
     // generate boulders, nuggets, and oil barrels so that none are closer than 6 squares to each other
     
-    m_numBarrels = 2;   // to ensure that the game runs
+    int B = min(getLevel()/2 + 2, 6);  // number of boulders to be generated for each level
+    int G = max(5-getLevel()/2, 2);   // number of nuggets
+    int L = min(2+getLevel(), 20);  // number of barrels of oil
+    
+    for (int i = 0; i < B; i++)   // add all of the boulders into the oil field (must be between (0,20) and (60, 56)
+    {
+        if (m_allActors.size() == 0)
+        {
+            int x = generateRandomNumber(0, 60);
+            int y = generateRandomNumber(20, 56);
+            
+            // making the first object, so don't need to check if it's close, but need to check if being generated into the mineshaft
+            
+            int numSquaresNoDirt = 0;            // check so that the boulder doesn't get generated in the mineshaft
+            bool inMineShaft = true;
+            while (inMineShaft)
+            {
+                for (int i = x; i < x + 4; i++)
+                {
+                    for (int j = y; j < y + 4; j++)
+                    {
+                        if (!isThereDirt(i, j))
+                            numSquaresNoDirt++;
+                    }
+                }
+                if (numSquaresNoDirt == 0)
+                    inMineShaft = false;
+                else
+                {
+                    x = generateRandomNumber(0, 60);
+                    y = generateRandomNumber(20, 56);
+                }
+            }
+            new Boulder(x, y, this);  // make the first boulder
+        }
+        else
+        {
+            int newX = 0;  // temp values before they get changed
+            int newY = 0;
+            getNewPosition(0, 20, 60, 56, newX, newY);
+            new Boulder(newX, newY, this);   // boulder isn't too close to anything else, so place it down
+        }
+    }
+    
+    for (int k = 0; k < G; k++)  // add all of the gold nuggets to the field (must be between (0,0) and (60, 56))
+    {
+        int newX = 0;
+        int newY = 0;
+        getNewPosition(0, 0, 60, 56, newX, newY);
+        new Nugget(newX, newY, false, true, true, this); // nugget can be placed down
+    }
+    
+    for (int m = 0; m < L; m++)  // add all of the barrels of oil to the field (must be between (0,0) and (60, 56))
+    {
+        int newX = 0;
+        int newY = 0;
+        getNewPosition(0, 0, 60, 56, newX, newY);
+        new OilBarrel(newX, newY, this);
+    }
+    
+    m_numBarrels = L;   // all of the barrels have been made
+    
+    m_numTicksSinceAddedProtester = max(25, 200-getLevel());  // add a protester in the very first tick
+    
+    m_numProtesters = 0;   // no protesters in the field yet
     
     // BEGIN TESTING CODE
-    
+    /*
     new Boulder(21, 24, this);
     
     new Boulder(21, 10, this);
@@ -70,7 +130,7 @@ int StudentWorld::init()
     new Protester(this);
     
     new HardcoreProtester(this);
-    
+    */
     // END TESTING CODE
     
     return GWSTATUS_CONTINUE_GAME;
@@ -105,6 +165,29 @@ int StudentWorld::move()
         else
             it++;
     }
+    
+    // possible add new actors during the tick
+    
+    int T = max(25, 200-getLevel());   // how many ticks to wait until allowed to add another protester
+    int P = min(15, 2 + getLevel()*1.5);  // target number of protesters in the field
+    int probabilityOfHardcore = min(90, getLevel()*10 + 30);  // probability of generating a hardcore protester
+    
+    if (m_numProtesters < P && m_numTicksSinceAddedProtester >= T)
+    {
+        int random = generateRandomNumber(0, probabilityOfHardcore);
+        if (random == 0)   // generate a hardcore protester since it fulfilled the probability
+        {
+            new HardcoreProtester(this);
+        }
+        else   // didn't fulfill the probability so just make a regular protester
+        {
+            new Protester(this);
+        }
+        // since made new protester, reset the number of ticks to wait (to -1 because gonna increment right after)
+        m_numTicksSinceAddedProtester = -1;
+        m_numProtesters++;
+    }
+    m_numTicksSinceAddedProtester++;
     
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
@@ -478,9 +561,7 @@ void StudentWorld::annoyFrackMan(int decreaseHP)
 
 double StudentWorld::getRadiusBetween(Actor* first, Actor* second) const
 {
-    double xDistance = first->getX() - second->getX();
-    double yDistance = first->getY() - second->getY();
-    return sqrt(pow(xDistance,2) + pow(yDistance,2));
+    return Pythagoras(first->getX(), first->getY(), second->getX(), second->getY());
 }
 
 int StudentWorld::max(int a, int b)
@@ -521,4 +602,64 @@ Actor::Direction StudentWorld::generateRandomDirection()
             break;
     }
     return Actor::none;   // this line of code should never get evaluated
+}
+
+double StudentWorld::Pythagoras(int x1, int y1, int x2, int y2) const 
+{
+    double xDistance = x1 - x2;
+    double yDistance = y1 - y2;
+    return sqrt(pow(xDistance,2) + pow(yDistance,2));
+}
+
+void StudentWorld::getNewPosition(int xBound1, int yBound1, int xBound2, int yBound2, int& newX, int& newY)
+{
+    int x = generateRandomNumber(xBound1, xBound2);
+    int y = generateRandomNumber(yBound1, yBound2);
+    
+//    // making the first object, so don't need to check if it's close, but need to check if being generated into the mineshaft
+//    
+//    int numSquaresNoDirt = 0;            // check so that the boulder doesn't get generated in the mineshaft
+//    bool inMineShaft = true;
+//    while (inMineShaft)
+//    {
+//        for (int i = x; i < x + 4; i++)
+//        {
+//            for (int j = y; j < y + 4; j++)
+//            {
+//                if (!isThereDirt(i, j))
+//                    numSquaresNoDirt++;
+//            }
+//        }
+//        if (numSquaresNoDirt == 0)
+//            inMineShaft = false;
+//        else
+//        {
+//            x = generateRandomNumber(xBound1, xBound2);
+//            y = generateRandomNumber(yBound1, yBound2);
+//        }
+//    }
+    
+    for (int j = 0; j < m_allActors.size(); j++)
+    {
+        int numSquaresNoDirt = 0;            // check so that the boulder doesn't get generated in the mineshaft
+        for (int i = x; i < x + 4; i++)
+        {
+            for (int j = y; j < y + 4; j++)
+            {
+                if (!isThereDirt(i, j))
+                    numSquaresNoDirt++;
+            }
+        }
+        
+        if (Pythagoras(x, y, m_allActors[j]->getX(), m_allActors[j]->getY()) <= 6.00 || numSquaresNoDirt > 0)  // too close or in mineshaft
+        {
+            // pick a new random set of coordinates for the new Boulder
+            x = generateRandomNumber(xBound1, xBound2);
+            y = generateRandomNumber(yBound1, yBound2);
+            j = 0;
+        }
+    }
+    // position is valid so save it into (newX, newY)
+    newX = x;
+    newY = y;
 }
