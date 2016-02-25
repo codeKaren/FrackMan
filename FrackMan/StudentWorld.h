@@ -23,6 +23,9 @@ private:
 class StudentWorld : public GameWorld
 {
 public:
+    
+    // MAINTAIN/REGULATE GAME
+    
     StudentWorld(std::string assetDir);
 
     virtual int init();
@@ -33,7 +36,10 @@ public:
     
     ~StudentWorld(); // frees dynamically allocated memory (FrackMan and Dirt)
     
+    
     void updateDisplayText();  // updates the text at the top of the screen during each move() call
+    
+    // MEMBER FUNCTIONS NEEDED FOR ACTORS IN THE GAME
     
     bool isThereDirt(int x, int y) const;   // returns true if there is dirt in the specified spot on the screen
     
@@ -67,7 +73,7 @@ public:
     
     void sonarFunction();  // makes all game objects within a radius of 12 visible
     
-    // MATH LIKE FUNCTIONS BELOW
+    // MATH-LIKE FUNCTIONS
     
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
 
@@ -79,10 +85,7 @@ public:
     
     Actor::Direction generateRandomDirection();  // returns a random direction
     
-    Actor::Direction whichDirectionToGoIn(Protester* protester);  // returns the direction that the protester should go in to reach the exit
-    
-    void updateMaze();  // updates the array for the protesters to use to find what direction they should move in 
-    
+    void whichDirectionToGoIn(Protester* protester, Actor::Direction& first, Actor::Direction& second, Actor::Direction& third, Actor::Direction& fourth);  // returns the direction that the protester should go in to reach the exit
     
 private:
     Dirt* m_dirt[64][64];
@@ -93,7 +96,9 @@ private:
     int m_numProtesters;
     
     // maze searching array
-    Actor::Direction m_maze[64][64];
+    int m_maze[64][64];
+    
+    void updateMaze();  // updates the array for the protesters to use to find what direction they should move in
     
     double Pythagoras(int x1, int y1, int x2, int y2) const;  // finds the Euclidean distance between two points
     

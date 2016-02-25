@@ -167,7 +167,6 @@ public:
     int getNumTicksSinceTurned() const;  // get m_numTicksSinceTurned
     virtual bool isHardcore() const; // returns false for a regular protester
     // Mutator functions
-    void timePasses(); // decrements m_numTicksLeft
     void setNumTicksLeft(int numTicksLeft);  // sets m_numTicksLeft to whatever you want it to be
     void setLeaveOilField(); // changes m_leaveOilFieldState to true
     void setNumTicksShout(int numTicksShout);  // change the value of m_numTicksSinceShout

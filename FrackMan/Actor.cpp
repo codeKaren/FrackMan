@@ -668,7 +668,7 @@ void Protester::doSomething()
     
     if (getNumTicksLeft() > 0)
     {
-        timePasses();
+        setNumTicksLeft(getNumTicksLeft()-1);
         return;
     }
     
@@ -683,8 +683,41 @@ void Protester::doSomething()
             // move one step closer to the exit (60, 60) by using a queue-based maze-searching algorithm
             // a single data structure that enables all protesters to determine their optimal path regardless of location???
             // have a 64 by 64 2D array that holds the direction that the protester should move in to get to the exit
-            setDirection(whereAmI()->whichDirectionToGoIn(this));
-            tryToMove(whereAmI()->whichDirectionToGoIn(this));
+            Direction first;
+            Direction second;
+            Direction third;
+            Direction fourth;
+            Direction whichWay[4] = {first, second, third, fourth};
+            whereAmI()->whichDirectionToGoIn(this, whichWay[0], whichWay[1], whichWay[2], whichWay[3]);
+//            for (int i = 0; i < 4; i++)  // try to move in one of the directions
+//            {
+//                if (canMove(whichWay[i]))   // can move
+//                {
+//                    setDirection(whichWay[i]);
+//                    tryToMove(whichWay[i]);
+//                    break; 
+//                }
+//            }
+            if (canMove(whichWay[0]))
+            {
+                setDirection(whichWay[0]);
+                tryToMove(whichWay[0]);
+            }
+            else if (canMove(whichWay[1]))
+            {
+                setDirection(whichWay[1]);
+                tryToMove(whichWay[1]);
+            }
+            else if (canMove(whichWay[2]))
+            {
+                setDirection(whichWay[2]);
+                tryToMove(whichWay[2]);
+            }
+            else
+            {
+                setDirection(whichWay[3]);
+                tryToMove(whichWay[3]);
+            }
         }
     }
     
@@ -812,11 +845,6 @@ int Protester::getNumTicksTotal() const
 int Protester::getNumTicksLeft() const
 {
     return m_numTicksLeft;
-}
-
-void Protester::timePasses()
-{
-    m_numTicksLeft--;
 }
 
 bool Protester::isLeaveOilFieldState() const

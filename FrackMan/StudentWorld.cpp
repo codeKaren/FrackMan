@@ -26,7 +26,7 @@ int StudentWorld::init()
     {
         for (int j = 0; j < 64; j++)
         {
-            if (i >= 30 && i <= 34 && j >= 4 && j <= 59)   // keep empty for mine shaft
+            if (i >= 30 && i < 34 && j >= 4 && j <= 59)   // keep empty for mine shaft
                 m_dirt[i][j] = nullptr;
             else if (j > 59)                          // keep the top four rows clear of dirt
                 m_dirt[i][j] = nullptr;
@@ -136,11 +136,13 @@ int StudentWorld::init()
     
     // inialize the maze direction array so it doesn't contain garbage values; CAUSES GAME TO NOT START????
     
-//    for (int i = 0; i < 64; i++)
-//    {
-//        for (int j = 0; j < 64; j++)
-//            m_maze[i][j] = Actor::none;
-//    }
+    for (int i = 0; i < 64; i++)
+    {
+        for (int j = 0; j < 64; j++)
+            m_maze[i][j] = 999;  // garbage values for nothing is there
+    }
+    
+    cout << "initialized" << endl;
     
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -174,6 +176,8 @@ int StudentWorld::move()
         else
             it++;
     }
+    
+    updateMaze();  // change the maze with directions for the protester to leave the maze 
     
     // possible add new actors during the tick
     
@@ -221,8 +225,6 @@ int StudentWorld::move()
             new WaterPool(x, y, (max(100, 300-10*getLevel())), this);  // found valid spot so generate a WaterPool
         }
     }
-    
-    updateMaze();
     
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
@@ -690,68 +692,131 @@ bool StudentWorld::isValidWaterPoolSpot(int x, int y) const
     return true;   // no dirt so can spawn WaterPool there
 }
 
-Actor::Direction StudentWorld::whichDirectionToGoIn(Protester* protester) // returns the direction that the protester should go in to reach the exit
+void StudentWorld::whichDirectionToGoIn(Protester* protester, Actor::Direction& first, Actor::Direction& second, Actor::Direction& third, Actor::Direction& fourth) // returns the direction that the protester should go in to reach the exit
 {
     int x = protester->getX();
     int y = protester->getY();
-    return m_maze[x][y];
+    
+    // a[0] = left, a[1] = right, a[2] = up, a[3] = down
+    int stepsNeeded[4] = {m_maze[x-1][y], m_maze[x+1][y], m_maze[x][y+1], m_maze[x][y-1]};
+    int posMin = 0;
+    for (int j = 0; j < 4; j++)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (stepsNeeded[i] < stepsNeeded[posMin])
+                posMin = i;
+        }
+        
+        stepsNeeded[posMin] = 1000;   // so you ignore that value when comparing in the future iterations
+        
+        switch (j)
+        {
+            case 0:
+                switch (posMin)
+                {
+                    case 0: first = Actor::left; break;
+                    case 1: first = Actor::right; break;
+                    case 2: first = Actor::up; break;
+                    case 3: first = Actor::down; break;
+                }
+                break;
+            case 1:
+                switch (posMin)
+                {
+                    case 0: second = Actor::left; break;
+                    case 1: second = Actor::right; break;
+                    case 2: second = Actor::up; break;
+                    case 3: second = Actor::down; break;
+                }
+                break;
+            case 2:
+                switch (posMin)
+                {
+                    case 0: third = Actor::left; break;
+                    case 1: third = Actor::right; break;
+                    case 2: third = Actor::up; break;
+                    case 3: third = Actor::down; break;
+                }
+                break;
+            case 3:
+                switch (posMin)
+                {
+                    case 0: fourth = Actor::left; break;
+                    case 1: fourth = Actor::right; break;
+                    case 2: fourth = Actor::up; break;
+                    case 3: fourth = Actor::down; break;
+                }
+                break;
+        }
+    }
 }
 
 void StudentWorld::updateMaze()  // updates the array for the protesters to use to find what direction they should move in
 {
     queue<Coord> coordQueue;    // create an empty queue
-    char maze[64][64];   // create an array of chars to hold a model of how the algorithm has travelled through the maze
+    
     for (int x = 0; x < 64; x++)   // actors can only travel between x = 0 and x = 60 and y = 0 and y = 60 throughout the game
     {
         for (int y = 0; y < 64; y++)
         {
-            if (isThereDirt(x, y) || mazeHasBoulder(x, y))   // protester cannot move that way since blocked
-                maze[x][y] = '#';
-            else
-            {
-                maze[x][y] = '.';
-            }
+            if (isThereDirt(x, y) || mazeHasBoulder(x, y) || x > 60 || y > 60)   // protester cannot move that way since blocked
+                m_maze[x][y] = 666;   // all spots with dirt or obstacles have the value -1
         }
     }
+    
+    int numSquaresAway = 1;
     
     Coord start(60, 60);
     
     coordQueue.push(start);
-    maze[60][60] = '#';
-    m_maze[60][60] = Actor::none;   // already reached the end so don't need to add a direction
+    
+    m_maze[60][60] = 0; // already reached the end so the number of steps to move from there is 0
     
     while (!coordQueue.empty())
     {
+        bool visitedAll = true;
+        
         Coord current = coordQueue.front();    // get the value of the top item before popping
         coordQueue.pop();
         
-        if (maze[current.r()][current.c()+1] == '.' && maze[current.r()+1][current.c()+1] == '.' && maze[current.r()+2][current.c()+1] == '.' && maze[current.r()+3][current.c()+1] == '.')   // can move NORTH
+        if (current.r() <= 60 && current.c()+1 <= 60 && current.r() >= 0 && current.c()+1 >= 0 && m_maze[current.r()][current.c()+1] == 999)   // can move NORTH
         {
             coordQueue.push(Coord(current.r(), current.c()+1));
-            maze[current.r()][current.c()+1] = '#';
-            m_maze[current.r()][current.c()+1] = Actor::down;
+            m_maze[current.r()][current.c()+1] = numSquaresAway;
         }
         
-        if (maze[current.r()][current.c()-1] == '.' && maze[current.r()+1][current.c()-1] == '.' && maze[current.r()+2][current.c()-1] == '.' && maze[current.r()+3][current.c()-1] == '.')   // can move SOUTH
+        if (current.r() <= 60 && current.c()-1 && current.r() >= 0 && current.c()-1 >= 0 && m_maze[current.r()][current.c()-1] == 999)   // can move SOUTH
         {
             coordQueue.push(Coord(current.r(), current.c()-1));
-            maze[current.r()][current.c()-1] = '#';
-            m_maze[current.r()][current.c()-1] = Actor::up;
+            m_maze[current.r()][current.c()-1] = numSquaresAway;
         }
         
-        if (maze[current.r()+1][current.c()] == '.' && maze[current.r()+1][current.c()+1] == '.' && maze[current.r()+1][current.c()+2] == '.' && maze[current.r()+1][current.c()+3] == '.')   // can move RIGHT
+        if (current.r()+1 <= 60 && current.c() <= 60 && current.r()+1 >= 0 && current.c() >= 0 && m_maze[current.r()+1][current.c()] == 999)   // can move RIGHT
         {
             coordQueue.push(Coord(current.r()+1, current.c()));
-            maze[current.r()+1][current.c()] = '#';
-            m_maze[current.r()+1][current.c()] = Actor::left;
+            m_maze[current.r()+1][current.c()] = numSquaresAway;
         }
         
-        if (maze[current.r()-1][current.c()] == '.' && maze[current.r()-1][current.c()+1] == '.' && maze[current.r()-1][current.c()+2] == '.' && maze[current.r()-1][current.c()+3] == '.')   // can move LEFT
+        if (current.r()-1 <= 60 && current.c() <= 60 && current.r()-1 >= 0 && current.c() >= 0 && m_maze[current.r()-1][current.c()] == 999)   // can move LEFT
         {
             coordQueue.push(Coord(current.r()-1, current.c()));
-            maze[current.r()-1][current.c()] = '#';
-            m_maze[current.r()-1][current.c()] = Actor::right;
+            m_maze[current.r()-1][current.c()] = numSquaresAway;
         }
+        
+        numSquaresAway++;
+        
+        for (int i = 0; i < 64; i++)
+        {
+            for (int j = 0; j < 64; j++)
+            {
+                if (m_maze[i][j] == 999)
+                    visitedAll = false;
+            }
+        }
+        
+        if (visitedAll)   // visited all of the squares in the grid and assigned number of steps to each of them
+            return;
     }
 }
 
