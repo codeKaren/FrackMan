@@ -38,6 +38,8 @@ int StudentWorld::init()
     // AND HIS NAME IS...FRAAAAAAAAACKMAN (DUM DE DUM DUM DUM DUMDUMDUM)
     m_FrackMan = new FrackMan(this);
     
+    cout << "done frackman" << endl;
+    
     // generate boulders, nuggets, and oil barrels so that none are closer than 6 squares to each other
     
     int B = min(getLevel()/2 + 2, 6);  // number of boulders to be generated for each level
@@ -46,43 +48,29 @@ int StudentWorld::init()
     
     for (int i = 0; i < B; i++)   // add all of the boulders into the oil field (must be between (0,20) and (60, 56)
     {
-        if (m_allActors.size() == 0)
+        int x = generateRandomNumber(0, 60);
+        int y = generateRandomNumber(20, 56);
+        
+        while (x >= 27 && x <= 33)
         {
-            int x = generateRandomNumber(0, 60);
-            int y = generateRandomNumber(20, 56);
-            
-            // making the first object, so don't need to check if it's close, but need to check if being generated into the mineshaft
-            
-            int numSquaresNoDirt = 0;            // check so that the boulder doesn't get generated in the mineshaft
-            bool inMineShaft = true;
-            while (inMineShaft)
+            x = generateRandomNumber(0, 60);
+        }
+        
+        for (int j = 0; j < m_allActors.size(); j++)
+        {
+            if (Pythagoras(x, y, m_allActors[j]->getX(), m_allActors[j]->getY()) <= 6.00 || (x >= 27 && x <= 33))  // too close or in mineshaft
             {
-                for (int i = x; i < x + 4; i++)
-                {
-                    for (int j = y; j < y + 4; j++)
-                    {
-                        if (!isThereDirt(i, j))
-                            numSquaresNoDirt++;
-                    }
-                }
-                if (numSquaresNoDirt == 0)
-                    inMineShaft = false;
-                else
-                {
-                    x = generateRandomNumber(0, 60);
-                    y = generateRandomNumber(20, 56);
-                }
+                // pick a new random set of coordinates for the new Boulder
+                x = generateRandomNumber(0, 60);
+                y = generateRandomNumber(20, 56);
+                j = 0;
             }
-            new Boulder(x, y, this);  // make the first boulder
         }
-        else
-        {
-            int newX = 0;  // temp values before they get changed
-            int newY = 0;
-            getNewPosition(0, 20, 60, 56, newX, newY);
-            new Boulder(newX, newY, this);   // boulder isn't too close to anything else, so place it down
-        }
+        
+        new Boulder(x, y, this);
     }
+    
+    cout << "done boulders" << endl;
     
     for (int k = 0; k < G; k++)  // add all of the gold nuggets to the field (must be between (0,0) and (60, 56))
     {
@@ -105,36 +93,6 @@ int StudentWorld::init()
     m_numTicksSinceAddedProtester = max(25, 200-getLevel());  // add a protester in the very first tick
     
     m_numProtesters = 0;   // no protesters in the field yet
-    
-    // BEGIN TESTING CODE
-    /*
-    new Boulder(21, 24, this);
-    
-    new Boulder(21, 10, this);
-    
-    new Boulder(6, 8, this);
-    
-    new Boulder(0, 0, this);
-    
-    m_numBarrels = 2;
-    
-    new OilBarrel(60, 0, this);
-    
-    new OilBarrel(58, 6, this);
-    
-    new Nugget(50, 8, false, true, true, this);
-    
-    new SonarKit((max(100, 300-10*getLevel())), this);
-    
-    new WaterPool(20, 60, (max(100, 300-10*getLevel())), this);
-    
-    new Protester(this);
-    
-    new HardcoreProtester(this);
-    */
-    // END TESTING CODE
-    
-    // inialize the maze direction array so it doesn't contain garbage values; CAUSES GAME TO NOT START????
     
     for (int i = 0; i < 64; i++)
     {
@@ -665,8 +623,8 @@ void StudentWorld::getNewPosition(int xBound1, int yBound1, int xBound2, int yBo
                     numSquaresNoDirt++;
             }
         }
-        
-        if (Pythagoras(x, y, m_allActors[j]->getX(), m_allActors[j]->getY()) <= 6.00 || numSquaresNoDirt > 0)  // too close or in mineshaft
+    
+        if ((Pythagoras(x, y, m_allActors[j]->getX(), m_allActors[j]->getY()) <= 6.00) || (numSquaresNoDirt > 0))  // too close or in mineshaft
         {
             // pick a new random set of coordinates for the new Boulder
             x = generateRandomNumber(xBound1, xBound2);
@@ -765,8 +723,6 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         }
     }
     
-    int numSquaresAway = 1;
-    
     Coord start(60, 60);
     
     coordQueue.push(start);
@@ -775,48 +731,64 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
     
     while (!coordQueue.empty())
     {
-        bool visitedAll = true;
-        
         Coord current = coordQueue.front();    // get the value of the top item before popping
         coordQueue.pop();
         
-        if (current.r() <= 60 && current.c()+1 <= 60 && current.r() >= 0 && current.c()+1 >= 0 && m_maze[current.r()][current.c()+1] == 999)   // can move NORTH
+        if (current.r() <= 60 && current.c()+1 <= 60 && current.r() >= 0 && current.c()+1 >= 0)   // can move NORTH
         {
-            coordQueue.push(Coord(current.r(), current.c()+1));
-            m_maze[current.r()][current.c()+1] = numSquaresAway;
-        }
-        
-        if (current.r() <= 60 && current.c()-1 && current.r() >= 0 && current.c()-1 >= 0 && m_maze[current.r()][current.c()-1] == 999)   // can move SOUTH
-        {
-            coordQueue.push(Coord(current.r(), current.c()-1));
-            m_maze[current.r()][current.c()-1] = numSquaresAway;
-        }
-        
-        if (current.r()+1 <= 60 && current.c() <= 60 && current.r()+1 >= 0 && current.c() >= 0 && m_maze[current.r()+1][current.c()] == 999)   // can move RIGHT
-        {
-            coordQueue.push(Coord(current.r()+1, current.c()));
-            m_maze[current.r()+1][current.c()] = numSquaresAway;
-        }
-        
-        if (current.r()-1 <= 60 && current.c() <= 60 && current.r()-1 >= 0 && current.c() >= 0 && m_maze[current.r()-1][current.c()] == 999)   // can move LEFT
-        {
-            coordQueue.push(Coord(current.r()-1, current.c()));
-            m_maze[current.r()-1][current.c()] = numSquaresAway;
-        }
-        
-        numSquaresAway++;
-        
-        for (int i = 0; i < 64; i++)
-        {
-            for (int j = 0; j < 64; j++)
+            if (m_maze[current.r()][current.c()+1] == 999)
             {
-                if (m_maze[i][j] == 999)
-                    visitedAll = false;
+                m_maze[current.r()][current.c()+1] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r(), current.c()+1));
+            }
+            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()][current.c()+1])
+            {
+                m_maze[current.r()][current.c()+1] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r(), current.c()+1));
             }
         }
         
-        if (visitedAll)   // visited all of the squares in the grid and assigned number of steps to each of them
-            return;
+        if (current.r() <= 60 && current.c()-1 && current.r() >= 0 && current.c()-1 >= 0)   // can move SOUTH
+        {
+            if (m_maze[current.r()][current.c()-1] == 999)
+            {
+                m_maze[current.r()][current.c()-1] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r(), current.c()-1));
+            }
+            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()][current.c()-1])
+            {
+                m_maze[current.r()][current.c()-1] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r(), current.c()-1));
+            }
+        }
+        
+        if (current.r()+1 <= 60 && current.c() <= 60 && current.r()+1 >= 0 && current.c() >= 0)   // can move RIGHT
+        {
+            if (m_maze[current.r()+1][current.c()] == 999)
+            {
+                m_maze[current.r()+1][current.c()] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r()+1, current.c()));
+            }
+            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()+1][current.c()])
+            {
+                m_maze[current.r()][current.c()-1] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r(), current.c()-1));
+            }
+        }
+        
+        if (current.r()-1 <= 60 && current.c() <= 60 && current.r()-1 >= 0 && current.c() >= 0)   // can move LEFT
+        {
+            if (m_maze[current.r()-1][current.c()] == 999)
+            {
+                m_maze[current.r()-1][current.c()] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r()-1, current.c()));
+            }
+            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()-1][current.c()])
+            {
+                m_maze[current.r()-1][current.c()] = m_maze[current.r()][current.c()] + 1;
+                coordQueue.push(Coord(current.r()-1, current.c()));
+            }
+        }
     }
 }
 

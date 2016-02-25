@@ -727,7 +727,7 @@ void Protester::doSomething()
             whereAmI()->playSound(SOUND_PROTESTER_YELL);
             whereAmI()->annoyFrackMan(2);
             setNumTicksShout(15);  // reset the number of ticks for the Protester to wait
-            setNumTicksLeft(60);   // prevent protester from moving for a while after shouting   ??? WHAT NUMBER ???
+            setNumTicksLeft(30);   // prevent protester from moving for a while after shouting
             setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
             return;
     }
@@ -747,6 +747,7 @@ void Protester::doSomething()
         setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
         return;
     }
+    
     else   // can't directly see FrackMan
     {
         if (getNumSquaresInCurrDir() <= 0)
