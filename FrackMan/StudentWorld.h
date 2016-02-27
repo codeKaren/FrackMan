@@ -27,11 +27,11 @@ public:
     // MAINTAIN/REGULATE GAME
     
     StudentWorld(std::string assetDir);
-
+    
     virtual int init();
-
+    
     virtual int move();
-
+    
     virtual void cleanUp();
     
     ~StudentWorld(); // frees dynamically allocated memory (FrackMan and Dirt)
@@ -39,6 +39,8 @@ public:
     void updateDisplayText();  // updates the text at the top of the screen during each move() call
     
     // MEMBER FUNCTIONS NEEDED FOR ACTORS IN THE GAME
+    
+    bool canMoveXY(int x, int y, Actor::Direction direction) const;   // returns true if an actor can move in the specified direction
     
     bool isThereDirt(int x, int y) const;   // returns true if there is dirt in the specified spot on the screen
     
@@ -62,7 +64,7 @@ public:
     
     bool closeToFrackMan(Actor* actor, double howClose) const; // returns true if a goodie is close enough for FrackMan to pick it up, discover it, etc.
     
-    void annoyFrackMan(int decreaseHP);  // annoy FrackMan 
+    void annoyFrackMan(int decreaseHP);  // annoy FrackMan
     
     bool isFacingFrackMan(Protester* protester) const; // returns true if a protester is facing FrackMan
     
@@ -75,7 +77,7 @@ public:
     // MATH-LIKE FUNCTIONS
     
     double getRadiusBetween(Actor* first, Actor* second) const;   // finds the Euclidian distance between two actors
-
+    
     int max(int a, int b);  // returns the bigger number
     
     int min(int a, int b);  // returns the smaller number

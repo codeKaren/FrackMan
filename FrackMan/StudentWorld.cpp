@@ -8,7 +8,7 @@ using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
 {
-	return new StudentWorld(assetDir);
+    return new StudentWorld(assetDir);
 }
 
 // Students:  Add code to this file (if you wish), StudentWorld.h, Actor.h and Actor.cpp
@@ -96,6 +96,9 @@ int StudentWorld::init()
             m_maze[i][j] = 999;  // garbage values for nothing is there
     }
     
+    // REMOVE
+    new HardcoreProtester(this);
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -117,6 +120,8 @@ int StudentWorld::move()
     
     updateMaze();  // change the maze with directions for the protester to leave the maze
     
+    updateFrackManFinder();  // change the maze for directions for Hardcore Protester
+    
     for (int i = 0; i < m_allActors.size(); i++)  // tell all of the other actors to do something (except dirt)
         m_allActors[i]->doSomething();
     
@@ -137,7 +142,7 @@ int StudentWorld::move()
     int T = max(25, 200-getLevel());   // how many ticks to wait until allowed to add another protester
     int P = min(15, 2 + getLevel()*1.5);  // target number of protesters in the field
     int probabilityOfHardcore = min(90, getLevel()*10 + 30);  // probability of generating a hardcore protester
-
+    
     if (m_numProtesters < P && m_numTicksSinceAddedProtester >= T)
     {
         int random = generateRandomNumber(1, probabilityOfHardcore);
@@ -273,7 +278,7 @@ bool StudentWorld::isThereObstacle(int x, int y) const    // return true if ther
     return false;
 }
 
-bool StudentWorld::radiusCloseToBoulder(int x, int y, Actor* actor) const  // FrackMan must be less than 3.00 from boulder
+bool StudentWorld::radiusCloseToBoulder(int x, int y, Actor* actor) const  // actor must be less than 3.00 from boulder
 {
     for (int i = 0; i < m_allActors.size(); i++)
     {
@@ -291,7 +296,7 @@ bool StudentWorld::radiusCloseToBoulder(int x, int y, Actor* actor) const  // Fr
     return false;
 }
 
-void StudentWorld::boulderSmash(Boulder* smasher)
+void StudentWorld::boulderSmash(Boulder* smasher)  // boulder hits a FrackMan or a Protester
 {
     if (closeToFrackMan(smasher, 3.00))   // boulder hits FrackMan
     {
@@ -543,9 +548,9 @@ void StudentWorld::sonarFunction()
     for (int i = 0; i < m_allActors.size(); i++)
     {
         if (!m_allActors[i]->isVisible() && closeToFrackMan(m_allActors[i], 12.00))
-            {
-                m_allActors[i]->makeVisible();
-            }
+        {
+            m_allActors[i]->makeVisible();
+        }
     }
 }
 
@@ -568,7 +573,7 @@ int StudentWorld::min(int a, int b)
     return b;
 }
 
-int StudentWorld::generateRandomNumber(int startNum, int endNum)  
+int StudentWorld::generateRandomNumber(int startNum, int endNum)
 {
     return rand() % (endNum-startNum) + startNum;  // returns something within the range from startNum to endNum
 }
@@ -594,7 +599,7 @@ Actor::Direction StudentWorld::generateRandomDirection()
     return Actor::none;   // this line of code should never get evaluated
 }
 
-double StudentWorld::Pythagoras(int x1, int y1, int x2, int y2) const 
+double StudentWorld::Pythagoras(int x1, int y1, int x2, int y2) const
 {
     double xDistance = x1 - x2;
     double yDistance = y1 - y2;
@@ -617,7 +622,7 @@ void StudentWorld::getNewPosition(int xBound1, int yBound1, int xBound2, int yBo
                     numSquaresNoDirt++;
             }
         }
-    
+        
         if ((Pythagoras(x, y, m_allActors[j]->getX(), m_allActors[j]->getY()) <= 6.00) || (numSquaresNoDirt > 0))  // too close or in mineshaft
         {
             // pick a new random set of coordinates for the new Boulder
@@ -662,43 +667,43 @@ void StudentWorld::whichDirectionToGoIn(Protester* protester, Actor::Direction& 
         
         stepsNeeded[posMin] = 1000;   // so you ignore that value when comparing in the future iterations
         
-        switch (j)   // set the values for the best direction to go in 
+        switch (j)   // set the values for the best direction to go in
         {
             case 0:
                 switch (posMin)
-                {
-                    case 0: first = Actor::left; break;
-                    case 1: first = Actor::right; break;
-                    case 2: first = Actor::up; break;
-                    case 3: first = Actor::down; break;
-                }
+            {
+                case 0: first = Actor::left; break;
+                case 1: first = Actor::right; break;
+                case 2: first = Actor::up; break;
+                case 3: first = Actor::down; break;
+            }
                 break;
             case 1:
                 switch (posMin)
-                {
-                    case 0: second = Actor::left; break;
-                    case 1: second = Actor::right; break;
-                    case 2: second = Actor::up; break;
-                    case 3: second = Actor::down; break;
-                }
+            {
+                case 0: second = Actor::left; break;
+                case 1: second = Actor::right; break;
+                case 2: second = Actor::up; break;
+                case 3: second = Actor::down; break;
+            }
                 break;
             case 2:
                 switch (posMin)
-                {
-                    case 0: third = Actor::left; break;
-                    case 1: third = Actor::right; break;
-                    case 2: third = Actor::up; break;
-                    case 3: third = Actor::down; break;
-                }
+            {
+                case 0: third = Actor::left; break;
+                case 1: third = Actor::right; break;
+                case 2: third = Actor::up; break;
+                case 3: third = Actor::down; break;
+            }
                 break;
             case 3:
                 switch (posMin)
-                {
-                    case 0: fourth = Actor::left; break;
-                    case 1: fourth = Actor::right; break;
-                    case 2: fourth = Actor::up; break;
-                    case 3: fourth = Actor::down; break;
-                }
+            {
+                case 0: fourth = Actor::left; break;
+                case 1: fourth = Actor::right; break;
+                case 2: fourth = Actor::up; break;
+                case 3: fourth = Actor::down; break;
+            }
                 break;
         }
     }
@@ -709,21 +714,11 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
     queue<Coord> coordQueue;    // create an empty queue
     
     // reinitialize the map
-    
     for (int x = 0; x < 64; x++)   // set all spots in the array to 999 (999 means a spot hasn't been discovered yet)
     {
         for (int y = 0; y < 64; y++)
         {
             m_maze[x][y] = 999;
-        }
-    }
-    
-    for (int x = 0; x < 64; x++)   // actors can only travel between x = 0 and x = 60 and y = 0 and y = 60 throughout the game
-    {
-        for (int y = 0; y < 64; y++)
-        {
-            if (isThereDirt(x, y) || mazeHasBoulder(x, y) || x > 60 || y > 60)   // protester cannot move that way since blocked
-                m_maze[x][y] = 666;   // all spots with dirt or obstacles have the value -1
         }
     }
     
@@ -740,12 +735,12 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         
         if (current.r() <= 60 && current.c()+1 <= 60 && current.r() >= 0 && current.c()+1 >= 0)   // can move NORTH
         {
-            if (m_maze[current.r()][current.c()+1] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::up) && m_maze[current.r()][current.c()+1] == 999)
             {
                 m_maze[current.r()][current.c()+1] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()+1));
             }
-            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()][current.c()+1])
+            else if (canMoveXY(current.r(), current.c(), Actor::up) && m_maze[current.r()][current.c()] + 1 < m_maze[current.r()][current.c()+1])
             {
                 m_maze[current.r()][current.c()+1] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()+1));
@@ -754,12 +749,12 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         
         if (current.r() <= 60 && current.c()-1 && current.r() >= 0 && current.c()-1 >= 0)   // can move SOUTH
         {
-            if (m_maze[current.r()][current.c()-1] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::down) && (m_maze[current.r()][current.c()-1] == 999))
             {
                 m_maze[current.r()][current.c()-1] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()-1));
             }
-            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()][current.c()-1])
+            else if (canMoveXY(current.r(), current.c(), Actor::down) && m_maze[current.r()][current.c()] + 1 < m_maze[current.r()][current.c()-1])
             {
                 m_maze[current.r()][current.c()-1] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()-1));
@@ -768,12 +763,12 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         
         if (current.r()+1 <= 60 && current.c() <= 60 && current.r()+1 >= 0 && current.c() >= 0)   // can move RIGHT
         {
-            if (m_maze[current.r()+1][current.c()] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::right) && m_maze[current.r()+1][current.c()] == 999)
             {
                 m_maze[current.r()+1][current.c()] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()+1, current.c()));
             }
-            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()+1][current.c()])
+            else if (canMoveXY(current.r(), current.c(), Actor::right) && m_maze[current.r()][current.c()] + 1 < m_maze[current.r()+1][current.c()])
             {
                 m_maze[current.r()][current.c()-1] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()+1, current.c()));
@@ -782,12 +777,12 @@ void StudentWorld::updateMaze()  // updates the array for the protesters to use 
         
         if (current.r()-1 <= 60 && current.c() <= 60 && current.r()-1 >= 0 && current.c() >= 0)   // can move LEFT
         {
-            if (m_maze[current.r()-1][current.c()] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::left) && m_maze[current.r()-1][current.c()] == 999)
             {
                 m_maze[current.r()-1][current.c()] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()-1, current.c()));
             }
-            else if (m_maze[current.r()][current.c()] + 1 < m_maze[current.r()-1][current.c()])
+            else if (canMoveXY(current.r(), current.c(), Actor::left) && m_maze[current.r()][current.c()] + 1 < m_maze[current.r()-1][current.c()])
             {
                 m_maze[current.r()-1][current.c()] = m_maze[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()-1, current.c()));
@@ -823,20 +818,11 @@ void StudentWorld::updateFrackManFinder()
         }
     }
     
-    for (int x = 0; x < 64; x++)   // actors can only travel between x = 0 and x = 60 and y = 0 and y = 60 throughout the game
-    {
-        for (int y = 0; y < 64; y++)
-        {
-            if (isThereDirt(x, y) || mazeHasBoulder(x, y) || x > 60 || y > 60)   // protester cannot move that way since blocked
-                m_findFrackMan[x][y] = 666;   // all spots with dirt or obstacles have the value -1
-        }
-    }
-    
     Coord start(m_FrackMan->getX(), m_FrackMan->getY());
     
     coordQueue.push(start);
     
-    m_findFrackMan[m_FrackMan->getX()][m_FrackMan->getY()] = 0; // already found FrackMan so the number of steps to move from there is 0
+    m_findFrackMan[m_FrackMan->getX()][m_FrackMan->getY()] = 0; //already found FrackMan so the number of steps to move from there is 0
     
     while (!coordQueue.empty())
     {
@@ -845,12 +831,12 @@ void StudentWorld::updateFrackManFinder()
         
         if (current.r() <= 60 && current.c()+1 <= 60 && current.r() >= 0 && current.c()+1 >= 0)   // can move NORTH
         {
-            if (m_findFrackMan[current.r()][current.c()+1] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::up) && m_findFrackMan[current.r()][current.c()+1] == 999)
             {
                 m_findFrackMan[current.r()][current.c()+1] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()+1));
             }
-            else if (m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()][current.c()+1])
+            else if (canMoveXY(current.r(), current.c(), Actor::up) && m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()][current.c()+1])
             {
                 m_findFrackMan[current.r()][current.c()+1] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()+1));
@@ -859,12 +845,12 @@ void StudentWorld::updateFrackManFinder()
         
         if (current.r() <= 60 && current.c()-1 && current.r() >= 0 && current.c()-1 >= 0)   // can move SOUTH
         {
-            if (m_findFrackMan[current.r()][current.c()-1] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::down) && m_findFrackMan[current.r()][current.c()-1] == 999)
             {
                 m_findFrackMan[current.r()][current.c()-1] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()-1));
             }
-            else if (m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()][current.c()-1])
+            else if (canMoveXY(current.r(), current.c(), Actor::down) && m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()][current.c()-1])
             {
                 m_findFrackMan[current.r()][current.c()-1] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r(), current.c()-1));
@@ -873,12 +859,12 @@ void StudentWorld::updateFrackManFinder()
         
         if (current.r()+1 <= 60 && current.c() <= 60 && current.r()+1 >= 0 && current.c() >= 0)   // can move RIGHT
         {
-            if (m_findFrackMan[current.r()+1][current.c()] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::right) && m_findFrackMan[current.r()+1][current.c()] == 999)
             {
                 m_findFrackMan[current.r()+1][current.c()] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()+1, current.c()));
             }
-            else if (m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()+1][current.c()])
+            else if (canMoveXY(current.r(), current.c(), Actor::right) && m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()+1][current.c()])
             {
                 m_findFrackMan[current.r()][current.c()-1] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()+1, current.c()));
@@ -887,12 +873,12 @@ void StudentWorld::updateFrackManFinder()
         
         if (current.r()-1 <= 60 && current.c() <= 60 && current.r()-1 >= 0 && current.c() >= 0)   // can move LEFT
         {
-            if (m_findFrackMan[current.r()-1][current.c()] == 999)
+            if (canMoveXY(current.r(), current.c(), Actor::left) && m_findFrackMan[current.r()-1][current.c()] == 999)
             {
                 m_findFrackMan[current.r()-1][current.c()] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()-1, current.c()));
             }
-            else if (m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()-1][current.c()])
+            else if (canMoveXY(current.r(), current.c(), Actor::left) && m_findFrackMan[current.r()][current.c()] + 1 < m_findFrackMan[current.r()-1][current.c()])
             {
                 m_findFrackMan[current.r()-1][current.c()] = m_findFrackMan[current.r()][current.c()] + 1;
                 coordQueue.push(Coord(current.r()-1, current.c()));
@@ -964,4 +950,51 @@ void StudentWorld::whichDirToFrackMan(HardcoreProtester* protester, Actor::Direc
 int StudentWorld::getSquaresFromFrackMan(HardcoreProtester* protester)
 {
     return m_findFrackMan[protester->getX()][protester->getY()];
+}
+
+bool StudentWorld::canMoveXY(int x, int y, Actor::Direction direction) const
+{
+    int addToX = 0;     // modify x or y for each possible direction to move in
+    int addToY = 0;
+    int obstacleX = 0;
+    int obstacleY = 0;
+    switch (direction)
+    {
+        case Actor::left:
+            addToX = -1; obstacleX = -1; break;
+        case Actor::right:
+            addToX = 1; obstacleX = 4; break;
+        case Actor::down:
+            addToY = -1; obstacleY = -1; break;
+        case Actor::up:
+            addToY = 1; obstacleY = 4; break;
+        case Actor::none:
+            break;
+    }
+    
+    if (x+addToX < 0 || x+addToX > 60 || y+addToY < 0 || y+addToY > 60)  // gone out of bounds
+    {
+        return false;
+    }
+    else if (direction == Actor::left || direction == Actor::right)
+    {
+        for (int k = y; k < y + 4; k++)   // runs into obstacle or dirt
+        {
+            if (isThereDirt(x + obstacleX, k) || isThereObstacle(x+obstacleX, y+obstacleY))
+            {
+                return false;
+            }
+        }
+    }
+    else if (direction == Actor::down || direction == Actor::up)
+    {
+        for (int k = x; k < x + 4; k++)
+        {
+            if (isThereDirt(k, y + obstacleY) || isThereObstacle(x+obstacleX, y+obstacleY))
+            {
+                return false;
+            }
+        }
+    }
+    return true;  // no dirt or obstacles, so can move
 }

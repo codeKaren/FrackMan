@@ -52,49 +52,9 @@ bool Actor::isObstacle() const
 
 bool Actor::canMove(Direction direction) const
 {
-    int addToX = 0;     // modify x or y for each possible direction to move in
-    int addToY = 0;
-    int obstacleX = 0;
-    int obstacleY = 0;
-    switch (direction)
-    {
-        case left:
-            addToX = -1; obstacleX = -1; break;
-        case right:
-            addToX = 1; obstacleX = 4; break;
-        case down:
-            addToY = -1; obstacleY = -1; break;
-        case up:
-            addToY = 1; obstacleY = 4; break;
-        case none:
-            break;
-    }
-    
-    if (getX()+addToX < 0 || getX()+addToX > 60 || getY()+addToY < 0 || getY()+addToY > 60)  // gone out of bounds
-    {
-        return false;
-    }
-    else if (direction == left || direction == right)
-    {
-        for (int k = getY(); k < getY() + 4; k++)   // runs into obstacle or dirt
-        {
-            if (whereAmI()->isThereDirt(getX() + obstacleX, k) || whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))
-            {
-                return false;
-            }
-        }
-    }
-    else if (direction == down || direction == up)
-    {
-        for (int k = getX(); k < getX() + 4; k++)
-        {
-            if (whereAmI()->isThereDirt(k, getY()+ obstacleY) || whereAmI()->isThereObstacle(getX()+obstacleX, getY()+obstacleY))
-            {
-                return false;
-            }
-        }
-    }
-    return true;  // no dirt or obstacles, so can move
+    if (whereAmI()->canMoveXY(getX(), getY(), direction))
+        return true;
+    return false;
 }
 
 bool Actor::tryToMove(Direction direction)
@@ -150,10 +110,10 @@ Boulder::Boulder(int startX, int startY, StudentWorld* world)
     whereAmI()->addActor(this);
     whereAmI()->deleteDirt(this);
 }
-        
+
 Boulder::~Boulder()
 { }
-        
+
 void Boulder::doSomething()
 {
     if (!isStillAlive())
@@ -183,15 +143,15 @@ void Boulder::doSomething()
         if (numTicksWaiting >= 30)
         {
             if (numTicksWaiting == 30)
-                whereAmI()->playSound(SOUND_FALLING_ROCK);       // only plays the sound one time 
-
+                whereAmI()->playSound(SOUND_FALLING_ROCK);       // only plays the sound one time
+            
             if (!tryToMove(down))  // move downward (and kill the boulder if it can't move down)
                 makeDead();
             
             // boulder sees if it hits FrackMan or protesters
             whereAmI()->boulderSmash(this);
         }
-            numTicksWaiting++;
+        numTicksWaiting++;
     }
 }
 
@@ -220,7 +180,7 @@ Squirt::Squirt(int x, int y, Direction direction, StudentWorld* world)
         }
     }
     
-    // check to see if there is a boulder near the starting location of the squirt 
+    // check to see if there is a boulder near the starting location of the squirt
     if (whereAmI()->radiusCloseToBoulder(x, y, this))
     {
         makeDead();
@@ -299,7 +259,7 @@ int Goodies::howManyTicksLeft() const  // returns how many ticks the goodie has 
 
 void Goodies::decreaseNumTicks()  // decreases the number of ticks by one
 {
-    m_numTicks--; 
+    m_numTicks--;
 }
 
 // OIL BARREL IMPLEMENTATION ======================================================================================
@@ -307,7 +267,7 @@ void Goodies::decreaseNumTicks()  // decreases the number of ticks by one
 OilBarrel::OilBarrel(int startX, int startY, StudentWorld* world)
 : Goodies(IID_BARREL, startX, startY, right, 1.0, 2, false, 0, world)
 {
-
+    
 }
 
 OilBarrel::~OilBarrel()
@@ -388,7 +348,7 @@ void Nugget::doSomething()
 SonarKit::SonarKit(int numTicks, StudentWorld* world)
 : Goodies(IID_SONAR, 0, 60, right, 1.0, 2, true, numTicks, world)
 {
-
+    
 }
 
 SonarKit::~SonarKit()
@@ -418,9 +378,9 @@ void SonarKit::doSomething()
 // WATER POOL IMPLEMENTATION =====================================================================================
 
 WaterPool::WaterPool(int startX, int startY, int numTicks, StudentWorld* world)
-: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, numTicks, world)  
+: Goodies(IID_WATER_POOL, startX, startY, right, 1.0, 2, true, numTicks, world)
 {
-
+    
 }
 
 WaterPool::~WaterPool()
@@ -488,7 +448,7 @@ FrackMan::FrackMan(StudentWorld* world)
 FrackMan::~FrackMan()
 { }
 
-void FrackMan::doSomething() 
+void FrackMan::doSomething()
 {
     if (!isStillAlive())
         return;
@@ -583,13 +543,13 @@ void FrackMan::addToInventory(Goodies *goodie, char label)
 {
     switch (label)
     {
-            case 'n':     // nugget
+        case 'n':     // nugget
             m_numNuggets++;
             break;
-            case 's':     // sonar kit
+        case 's':     // sonar kit
             m_numSonars++;
             break;
-            case 'w':     // water
+        case 'w':     // water
             m_numSquirts+=5;
             break;
     }
@@ -611,7 +571,7 @@ void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
     
     else     // no boulders and not out of bounds, so move
         moveTo(getX()+addToX, getY()+addToY);
-       
+    
     if (whereAmI()->deleteDirt(this))        // if you dig into dirt, play the digging sound
         whereAmI()->playSound(SOUND_DIG);
 }
@@ -690,46 +650,48 @@ void Protester::doSomething()
                 {
                     setDirection(whichWay[i]);
                     tryToMove(whichWay[i]);
-                    break; 
+                    break;
                 }
             }
-//            if (canMove(whichWay[0]))
-//            {
-//                setDirection(whichWay[0]);
-//                tryToMove(whichWay[0]);
-//            }
-//            else if (canMove(whichWay[1]))
-//            {
-//                setDirection(whichWay[1]);
-//                tryToMove(whichWay[1]);
-//            }
-//            else if (canMove(whichWay[2]))
-//            {
-//                setDirection(whichWay[2]);
-//                tryToMove(whichWay[2]);
-//            }
-//            else
-//            {
-//                setDirection(whichWay[3]);
-//                tryToMove(whichWay[3]);
-//            }
+            //            if (canMove(whichWay[0]))
+            //            {
+            //                setDirection(whichWay[0]);
+            //                tryToMove(whichWay[0]);
+            //            }
+            //            else if (canMove(whichWay[1]))
+            //            {
+            //                setDirection(whichWay[1]);
+            //                tryToMove(whichWay[1]);
+            //            }
+            //            else if (canMove(whichWay[2]))
+            //            {
+            //                setDirection(whichWay[2]);
+            //                tryToMove(whichWay[2]);
+            //            }
+            //            else
+            //            {
+            //                setDirection(whichWay[3]);
+            //                tryToMove(whichWay[3]);
+            //            }
         }
     }
     
     else if (whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->isFacingFrackMan(this) && getNumTicksSinceShout() <= 0)
     {
-            // close enough, is facing FrackMan, and hasn't shouted for 15 non-resting ticks
-            whereAmI()->playSound(SOUND_PROTESTER_YELL);
-            whereAmI()->annoyFrackMan(2);
-            setNumTicksShout(15);  // reset the number of ticks for the Protester to wait
-            setNumTicksLeft(30);   // prevent protester from moving for a while after shouting
-            setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
-            return;
+        // close enough, is facing FrackMan, and hasn't shouted for 15 non-resting ticks
+        whereAmI()->playSound(SOUND_PROTESTER_YELL);
+        whereAmI()->annoyFrackMan(2);
+        setNumTicksShout(15);  // reset the number of ticks for the Protester to wait
+        setNumTicksLeft(30);   // prevent protester from moving for a while after shouting
+        setNumTicksSinceTurned(getNumTicksSinceTurned()-1);
+        return;
     }
     
     else if(doDifferentiatedStuff())
     {
-        
+        setNumTicksLeft(getNumTicksTotal());  // protester already had a non-resting turn, so reset the numTicksLeft
+        setNumTicksShout(getNumTicksSinceShout()-1);  // decrease the number of ticks that the protester must wait to shout
+        return;
     }
     
     else if (whereAmI()->isInLineOfSight(this) && !whereAmI()->closeToFrackMan(this, 4.00) && whereAmI()->canMoveToFrackMan(this))
@@ -907,7 +869,6 @@ HardcoreProtester::~HardcoreProtester()
 
 bool HardcoreProtester::doDifferentiatedStuff()
 {
-    
     if (!whereAmI()->closeToFrackMan(this, 4.00))  // hardcore protester is more than 4.00 units away from FrackMan
     {
         int M = 16 + whereAmI()->getLevel()*2;
@@ -921,13 +882,13 @@ bool HardcoreProtester::doDifferentiatedStuff()
          line of sight to the FrackMan, so long as he can be reached in M moves
          without digging through Dirt or going through a Boulder. In such a
          situation, the Hardcore Protester will:
-            i. Determine which horizontal/vertical direction to move in (as
-            dictated by its maze-searching algorithm) such that if it were to
-            make such a move it would be one square closer to the FrackMan.
-            ii. Change its current direction to face this new direction.
-            iii. Move one square in this direction such that after the move it is one
-            square closer to the FrackMan’s current location.
-            iv. Return immediately.
+         i. Determine which horizontal/vertical direction to move in (as
+         dictated by its maze-searching algorithm) such that if it were to
+         make such a move it would be one square closer to the FrackMan.
+         ii. Change its current direction to face this new direction.
+         iii. Move one square in this direction such that after the move it is one
+         square closer to the FrackMan’s current location.
+         iv. Return immediately.
          */
         if (whereAmI()->getSquaresFromFrackMan(this) < M)
         {
@@ -943,10 +904,10 @@ bool HardcoreProtester::doDifferentiatedStuff()
                 {
                     setDirection(whichWay[i]);
                     tryToMove(whichWay[i]);
-                    break;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
     }
     return false;
