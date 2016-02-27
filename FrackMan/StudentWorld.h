@@ -36,7 +36,6 @@ public:
     
     ~StudentWorld(); // frees dynamically allocated memory (FrackMan and Dirt)
     
-    
     void updateDisplayText();  // updates the text at the top of the screen during each move() call
     
     // MEMBER FUNCTIONS NEEDED FOR ACTORS IN THE GAME
@@ -87,6 +86,10 @@ public:
     
     void whichDirectionToGoIn(Protester* protester, Actor::Direction& first, Actor::Direction& second, Actor::Direction& third, Actor::Direction& fourth);  // returns the direction that the protester should go in to reach the exit
     
+    int getSquaresFromFrackMan(HardcoreProtester* protester);  // returns the number of squares from FrackMan a protester is
+    
+    void whichDirToFrackMan(HardcoreProtester* protester, Actor::Direction& first, Actor::Direction& second, Actor::Direction& third, Actor::Direction& fourth); // returns the direction that the protester should go in to reach FrackMan
+    
 private:
     Dirt* m_dirt[64][64];
     FrackMan* m_FrackMan;
@@ -98,7 +101,12 @@ private:
     // maze searching array
     int m_maze[64][64];
     
+    // Frackman finding array for the Hardcore protester
+    int m_findFrackMan[64][64];
+    
     void updateMaze();  // updates the array for the protesters to use to find what direction they should move in
+    
+    void updateFrackManFinder();   // updates the array for the hardcore protesters to find FrackMan
     
     double Pythagoras(int x1, int y1, int x2, int y2) const;  // finds the Euclidean distance between two points
     

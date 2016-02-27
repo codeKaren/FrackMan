@@ -229,9 +229,7 @@ Squirt::Squirt(int x, int y, Direction direction, StudentWorld* world)
 }
 
 Squirt::~Squirt()
-{
-    
-}
+{ }
 
 void Squirt::doSomething()
 {
@@ -292,9 +290,7 @@ Goodies::Goodies(int imageID, int startX, int startY, Direction startDirection, 
 }
 
 Goodies::~Goodies()
-{
-    
-}
+{ }
 
 int Goodies::howManyTicksLeft() const  // returns how many ticks the goodie has left before it must disappear
 {
@@ -657,7 +653,6 @@ Protester::~Protester()
 
 bool Protester::doDifferentiatedStuff()
 {
-    // cout << "regular differentiated stuff" << endl;
     return false;
 }
 
@@ -689,35 +684,35 @@ void Protester::doSomething()
             Direction fourth;
             Direction whichWay[4] = {first, second, third, fourth};
             whereAmI()->whichDirectionToGoIn(this, whichWay[0], whichWay[1], whichWay[2], whichWay[3]);
-//            for (int i = 0; i < 4; i++)  // try to move in one of the directions
+            for (int i = 0; i < 4; i++)  // try to move in one of the directions
+            {
+                if (canMove(whichWay[i]))   // can move
+                {
+                    setDirection(whichWay[i]);
+                    tryToMove(whichWay[i]);
+                    break; 
+                }
+            }
+//            if (canMove(whichWay[0]))
 //            {
-//                if (canMove(whichWay[i]))   // can move
-//                {
-//                    setDirection(whichWay[i]);
-//                    tryToMove(whichWay[i]);
-//                    break; 
-//                }
+//                setDirection(whichWay[0]);
+//                tryToMove(whichWay[0]);
 //            }
-            if (canMove(whichWay[0]))
-            {
-                setDirection(whichWay[0]);
-                tryToMove(whichWay[0]);
-            }
-            else if (canMove(whichWay[1]))
-            {
-                setDirection(whichWay[1]);
-                tryToMove(whichWay[1]);
-            }
-            else if (canMove(whichWay[2]))
-            {
-                setDirection(whichWay[2]);
-                tryToMove(whichWay[2]);
-            }
-            else
-            {
-                setDirection(whichWay[3]);
-                tryToMove(whichWay[3]);
-            }
+//            else if (canMove(whichWay[1]))
+//            {
+//                setDirection(whichWay[1]);
+//                tryToMove(whichWay[1]);
+//            }
+//            else if (canMove(whichWay[2]))
+//            {
+//                setDirection(whichWay[2]);
+//                tryToMove(whichWay[2]);
+//            }
+//            else
+//            {
+//                setDirection(whichWay[3]);
+//                tryToMove(whichWay[3]);
+//            }
         }
     }
     
@@ -732,7 +727,7 @@ void Protester::doSomething()
             return;
     }
     
-    else if (doDifferentiatedStuff())  // doesn't evaluate for regular protesters, maybe evaluate for hardcore protesters
+    else if(doDifferentiatedStuff())
     {
         
     }
@@ -908,12 +903,10 @@ HardcoreProtester::HardcoreProtester(StudentWorld* world)
 
 HardcoreProtester::~HardcoreProtester()
 {
-    
 }
 
 bool HardcoreProtester::doDifferentiatedStuff()
 {
-    // cout << "hardcore differentiated stuff" << endl;
     
     if (!whereAmI()->closeToFrackMan(this, 4.00))  // hardcore protester is more than 4.00 units away from FrackMan
     {
@@ -936,6 +929,25 @@ bool HardcoreProtester::doDifferentiatedStuff()
             square closer to the FrackMan’s current location.
             iv. Return immediately.
          */
+        if (whereAmI()->getSquaresFromFrackMan(this) < M)
+        {
+            Direction first;
+            Direction second;
+            Direction third;
+            Direction fourth;
+            Direction whichWay[4] = {first, second, third, fourth};
+            whereAmI()->whichDirToFrackMan(this, whichWay[0], whichWay[1], whichWay[2], whichWay[3]);
+            for (int i = 0; i < 4; i++)  // try to move in one of the directions
+            {
+                if (canMove(whichWay[i]))   // can move
+                {
+                    setDirection(whichWay[i]);
+                    tryToMove(whichWay[i]);
+                    break;
+                }
+            }
+            return true;
+        }
     }
     return false;
 }
