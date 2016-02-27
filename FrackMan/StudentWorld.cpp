@@ -19,7 +19,7 @@ StudentWorld::StudentWorld(string assetDir)
     // CAN'T TOUCH THIS (MC HAMMER)
 }
 
-int StudentWorld::init()
+int StudentWorld::init() // initialize the oil field
 {
     // ADDING THE DIRT
     for (int i = 0; i < 64; i++)
@@ -96,13 +96,10 @@ int StudentWorld::init()
             m_maze[i][j] = 999;  // garbage values for nothing is there
     }
     
-    // REMOVE
-    new HardcoreProtester(this);
-    
     return GWSTATUS_CONTINUE_GAME;
 }
 
-int StudentWorld::move()
+int StudentWorld::move() // called during each tick of the game
 {
     // update the game status line
     updateDisplayText();
@@ -186,7 +183,7 @@ int StudentWorld::move()
     return GWSTATUS_CONTINUE_GAME;  // FrackMan isn't dead and hasn't gotten all of the barrels, so continue the game
 }
 
-void StudentWorld::cleanUp()
+void StudentWorld::cleanUp() // called at the very end to delete all dynamically allocated memory
 {
     for (int i = 0; i < 64; i++)
     {

@@ -484,7 +484,7 @@ void FrackMan::doSomething()
                     {
                         case left:
                         {
-                            Squirt* leftSquirt = new Squirt(getX()-4, getY(), left, whereAmI());
+                            Squirt* leftSquirt = new Squirt(getX()-4, getY(), left, whereAmI());   // make the squirt with correct direction
                             whereAmI()->addActor(leftSquirt);
                             break;
                         }
@@ -539,7 +539,7 @@ void FrackMan::doSomething()
     }
 }
 
-void FrackMan::addToInventory(Goodies *goodie, char label)
+void FrackMan::addToInventory(Goodies *goodie, char label)  // add a goodie to FrackMan's inventory since he picked it up
 {
     switch (label)
     {
@@ -555,7 +555,7 @@ void FrackMan::addToInventory(Goodies *goodie, char label)
     }
 }
 
-void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)
+void FrackMan::moveOrDig(Direction direction, int addToX, int addToY)  // try to move or dig in a certain direction
 {
     if (getDirection() != direction)    // only turn FrackMan in the current direction, DON'T MOVE
     {
@@ -611,7 +611,7 @@ Protester::~Protester()
     
 }
 
-bool Protester::doDifferentiatedStuff()
+bool Protester::doDifferentiatedStuff()  // contains code inside the hardcore protester
 {
     return false;
 }

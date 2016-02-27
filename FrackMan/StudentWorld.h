@@ -28,11 +28,11 @@ public:
     
     StudentWorld(std::string assetDir);
     
-    virtual int init();
+    virtual int init();  // initialize the oil field
     
-    virtual int move();
+    virtual int move();  // called during each tick of the game
     
-    virtual void cleanUp();
+    virtual void cleanUp();  // called at the very end to delete all dynamically allocated memory
     
     ~StudentWorld(); // frees dynamically allocated memory (FrackMan and Dirt)
     
